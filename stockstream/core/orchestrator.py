@@ -30,7 +30,7 @@ async def build_services() -> Services:
     database = DatabaseService()
     stream = StreamService()
     market = MarketService(database=database, stream=stream)
-    selector = SelectorService(database=database)
+    selector = SelectorService(database=database, market_storage=market.storage)
     tts = TTSService()
     agent = AgentService(selector=selector, tts=tts)
     danmu = DanmuService(stream=stream)

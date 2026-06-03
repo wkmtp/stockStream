@@ -1,13 +1,5 @@
-"""AkShare/Eastmoney market data collection module."""
+"""AkShare/Eastmoney market data collection module.
 
-from stockstream.market.collector import AkshareEastMoneyCollector
-from stockstream.market.models import CollectorConfig, MarketDataset, StockSymbol
-from stockstream.market.storage import MarketSQLiteStorage
-
-__all__ = [
-    "AkshareEastMoneyCollector",
-    "CollectorConfig",
-    "MarketDataset",
-    "MarketSQLiteStorage",
-    "StockSymbol",
-]
+Heavy collector/storage imports are intentionally avoided here so importing
+market models does not require optional runtime dependencies before install.
+"""

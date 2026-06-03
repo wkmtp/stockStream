@@ -66,6 +66,15 @@ async def latest_market_cache(request: Request, dataset: MarketDataset, limit: i
     return await services.market.storage.latest(dataset=dataset, limit=limit)
 
 
+@router.get("/selector/signals")
+async def selector_signals(request: Request) -> dict:
+    """Return Top10 open/add/reduce/clear selector signals."""
+
+    services = get_services(request)
+    report = await services.selector.generate_signals(top_n=10)
+    return report.to_dict()
+
+
 @router.post("/agent/brief")
 async def agent_brief(request: Request, symbols: list[str]) -> dict:
     """Generate a lightweight symbol brief."""

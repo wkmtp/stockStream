@@ -26,6 +26,9 @@ stockStream/
 │   │   ├── service.py
 │   │   └── storage.py
 │   ├── selector/
+│   │   ├── indicators.py
+│   │   ├── models.py
+│   │   ├── repository.py
 │   │   └── service.py
 │   ├── tts/
 │   │   └── service.py
@@ -49,7 +52,7 @@ stockStream/
 | Module | Responsibility |
 | --- | --- |
 | `market` | AkShare 东方财富实时行情、资金流向、日线、60分钟线采集、缓存与 tick normalization. |
-| `selector` | Lightweight stock ranking and signal selection. |
+| `selector` | Rule-based Top10 建仓、补仓、减仓、清仓 signal selection from cached market data. |
 | `tts` | Local text-to-speech task facade. |
 | `agent` | Strategy assistant orchestration across selector and TTS. |
 | `stream` | Bounded in-memory event bus to control memory usage. |
@@ -122,6 +125,21 @@ Manual endpoints:
 ```bash
 curl -X POST "http://localhost:8000/market/refresh"
 curl "http://localhost:8000/market/cache/eastmoney_spot?limit=10"
+```
+
+## Selector rules
+
+The `selector` module reads cached Eastmoney realtime quote, fund-flow, and daily
+K-line rows from SQLite, computes MA20/MA60, MACD, RSI, volume shrinkage, and
+fund-flow features, then returns four Top10 lists through `GET /selector/signals`:
+
+- **Top10建仓**: MA20上方, 涨幅2%-5%, MACD金叉, 资金流入, 换手率3%-15%; candidates are sorted by absolute inflow amount descending.
+- **Top10补仓**: MA20偏离≤-5%, RSI<35, 缩量, 机构资金流入; candidates are sorted by absolute institutional inflow amount descending.
+- **Top10减仓**: MA20正偏离>8%, MACD死叉, 资金净流出; candidates are sorted by absolute outflow amount descending.
+- **Top10清仓**: MA20正偏离>8%, close<MA60, MACD死叉, money_flow<0; candidates are sorted by absolute outflow amount descending.
+
+```bash
+curl "http://localhost:8000/selector/signals"
 ```
 
 ## TensorRT extension plan
