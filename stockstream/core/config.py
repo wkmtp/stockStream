@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     tensorrt_enabled: bool = False
     stream_queue_size: int = Field(default=1024, ge=128, le=8192)
     market_poll_seconds: int = Field(default=5, ge=1, le=300)
+    market_sqlite_path: str = "data/market_cache.db"
+    market_symbols: str = ""
 
 
 @lru_cache(maxsize=1)

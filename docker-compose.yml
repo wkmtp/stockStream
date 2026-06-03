@@ -14,6 +14,8 @@ services:
       STOCKSTREAM_DB_URL: sqlite+aiosqlite:///data/stockstream.db
       STOCKSTREAM_MAX_MEMORY_MB: 6144
       STOCKSTREAM_TENSORRT_ENABLED: "false"
+      STOCKSTREAM_MARKET_SQLITE_PATH: /data/market_cache.db
+      STOCKSTREAM_MARKET_SYMBOLS: "000001,600519"
     volumes:
       - ./data:/data
       - ./logs:/app/logs

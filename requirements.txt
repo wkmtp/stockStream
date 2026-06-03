@@ -9,6 +9,8 @@ httpx==0.28.1
 websockets==14.1
 python-dotenv==1.0.1
 numpy==1.26.4
+pandas==2.2.3
+akshare>=1.18.60,<1.19.0
 pyttsx3==2.98
 apscheduler==3.11.0
 

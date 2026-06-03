@@ -1,8 +1,12 @@
 """FastAPI routes for the StockStream service."""
 
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+
 from fastapi import APIRouter, FastAPI, Request, WebSocket
 
 from stockstream.core.orchestrator import Services
+from stockstream.market.models import MarketDataset
 
 router = APIRouter()
 
@@ -10,8 +14,17 @@ router = APIRouter()
 def create_app(services: Services) -> FastAPI:
     """Create the FastAPI application and attach module services."""
 
-    app = FastAPI(title="StockStream", version="0.1.0")
-    app.state.services = services
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        app.state.services = services
+        await services.market.start_collector()
+        try:
+            yield
+        finally:
+            await services.market.stop_collector()
+            await services.database.close()
+
+    app = FastAPI(title="StockStream", version="0.1.0", lifespan=lifespan)
     app.include_router(router)
     return app
 
@@ -35,6 +48,22 @@ async def ingest_tick(request: Request, symbol: str, price: float) -> dict:
 
     services = get_services(request)
     return await services.market.ingest_tick(symbol=symbol, price=price)
+
+
+@router.post("/market/refresh")
+async def refresh_market(request: Request) -> list[dict]:
+    """Trigger one AkShare refresh cycle immediately."""
+
+    services = get_services(request)
+    return await services.market.refresh_once()
+
+
+@router.get("/market/cache/{dataset}")
+async def latest_market_cache(request: Request, dataset: MarketDataset, limit: int = 100) -> list[dict]:
+    """Read the latest cached market rows for a dataset."""
+
+    services = get_services(request)
+    return await services.market.storage.latest(dataset=dataset, limit=limit)
 
 
 @router.post("/agent/brief")

@@ -21,7 +21,10 @@ stockStream/
 │   │   ├── config.py
 │   │   └── orchestrator.py
 │   ├── market/
-│   │   └── service.py
+│   │   ├── collector.py
+│   │   ├── models.py
+│   │   ├── service.py
+│   │   └── storage.py
 │   ├── selector/
 │   │   └── service.py
 │   ├── tts/
@@ -45,7 +48,7 @@ stockStream/
 
 | Module | Responsibility |
 | --- | --- |
-| `market` | Market data ingestion and tick normalization. |
+| `market` | AkShare 东方财富实时行情、资金流向、日线、60分钟线采集、缓存与 tick normalization. |
 | `selector` | Lightweight stock ranking and signal selection. |
 | `tts` | Local text-to-speech task facade. |
 | `agent` | Strategy assistant orchestration across selector and TTS. |
@@ -60,6 +63,8 @@ stockStream/
 - Run one uvicorn worker by default.
 - Use SQLite for single-node deployment to avoid external database memory cost.
 - Use bounded asyncio queues for stream events.
+- Run AkShare blocking calls through `asyncio.to_thread` with low concurrency.
+- Cache market data into local SQLite with WAL mode and upsert semantics.
 - Set Docker Compose memory limit to `6g`.
 - Keep TensorRT imports lazy so the base runtime does not require JetPack-specific
   packages until inference is enabled.
@@ -93,6 +98,31 @@ Environment variables use the `STOCKSTREAM_` prefix:
 | `STOCKSTREAM_MAX_MEMORY_MB` | `6144` | Memory budget guardrail. |
 | `STOCKSTREAM_TENSORRT_ENABLED` | `false` | Enables future TensorRT runtime path. |
 | `STOCKSTREAM_STREAM_QUEUE_SIZE` | `1024` | Bounded event queue size. |
+| `STOCKSTREAM_MARKET_POLL_SECONDS` | `5` | AkShare collector refresh interval. |
+| `STOCKSTREAM_MARKET_SQLITE_PATH` | `data/market_cache.db` | SQLite cache path for market data. |
+| `STOCKSTREAM_MARKET_SYMBOLS` | empty | Comma-separated A-share codes for fund-flow and K-line collection. |
+
+
+## Market collector
+
+The `market` module uses AkShare Eastmoney interfaces and runs continuously when
+the FastAPI application starts:
+
+- `stock_zh_a_spot_em()` for 东方财富 A 股实时行情.
+- `stock_individual_fund_flow(stock, market)` for 东方财富个股资金流向.
+- `stock_zh_a_hist(period="daily")` for daily K-line data.
+- `stock_zh_a_hist_min_em(period="60")` for 60-minute K-line data.
+
+The collector refreshes every 5 seconds by default, wraps blocking AkShare calls
+in asyncio worker threads, automatically backs off and reconnects after errors,
+and writes normalized JSON payloads into SQLite table `market_cache`.
+
+Manual endpoints:
+
+```bash
+curl -X POST "http://localhost:8000/market/refresh"
+curl "http://localhost:8000/market/cache/eastmoney_spot?limit=10"
+```
 
 ## TensorRT extension plan
 
