@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  stockstream:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: stockstream:jetson-nx
+    container_name: stockstream
+    restart: unless-stopped
+    environment:
+      STOCKSTREAM_HOST: 0.0.0.0
+      STOCKSTREAM_PORT: 8000
+      STOCKSTREAM_DB_URL: sqlite+aiosqlite:///data/stockstream.db
+      STOCKSTREAM_MAX_MEMORY_MB: 6144
+      STOCKSTREAM_TENSORRT_ENABLED: "false"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+    # Enable when TensorRT/GPU inference is added and NVIDIA runtime is configured.
+    # runtime: nvidia

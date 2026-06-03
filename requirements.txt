@@ -1,0 +1,16 @@
+# Core runtime for Jetson Xavier NX / Ubuntu 20.04 / Python 3.10
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+SQLAlchemy==2.0.36
+aiosqlite==0.20.0
+httpx==0.28.1
+websockets==14.1
+python-dotenv==1.0.1
+numpy==1.26.4
+pyttsx3==2.98
+apscheduler==3.11.0
+
+# Optional extension points (install only when needed on Jetson)
+# tensorrt: install from NVIDIA JetPack repositories when enabling TensorRT inference.
