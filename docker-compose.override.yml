@@ -1,0 +1,16 @@
+# docker-compose.override.yml — local development overrides.
+# Automatically merged by `docker compose up`.
+# Override volumes to use current directory for data persistence.
+
+version: "3.8"
+
+services:
+  stockstream:
+    # For local dev, disable resource limits so Docker Desktop doesn't choke.
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+    environment:
+      STOCKSTREAM_MAX_MEMORY_MB: "4096"
+      STOCKSTREAM_AVATAR_ENABLED: "false"

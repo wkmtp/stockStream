@@ -1,29 +1,174 @@
-version: "3.8"
+# StockStream v2.0 — Docker Compose 配置
+# 一键启动: docker compose up -d
+# 查看日志: docker compose logs -f
+# 停止: docker compose down
 
+version: "3.9"
+
+# ── Networks ──────────────────────────────────────────────────────────────
+networks:
+  stockstream-net:
+    driver: bridge
+    name: stockstream-net
+
+# ── Volumes ───────────────────────────────────────────────────────────────
+volumes:
+  stockstream-data:
+    driver: local
+  stockstream-logs:
+    driver: local
+  stockstream-cache:
+    driver: local
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+
+# ── Services ──────────────────────────────────────────────────────────────
 services:
+
+  # ═══ 核心应用 ═══
   stockstream:
     build:
       context: .
       dockerfile: Dockerfile
-    image: stockstream:jetson-nx
-    container_name: stockstream
+      target: production
+    image: stockstream:latest
+    container_name: stockstream-app
     restart: unless-stopped
-    environment:
-      STOCKSTREAM_HOST: 0.0.0.0
-      STOCKSTREAM_PORT: 8000
-      STOCKSTREAM_DB_URL: sqlite+aiosqlite:///data/stockstream.db
-      STOCKSTREAM_MAX_MEMORY_MB: 6144
-      STOCKSTREAM_TENSORRT_ENABLED: "false"
-      STOCKSTREAM_MARKET_SQLITE_PATH: /data/market_cache.db
-      STOCKSTREAM_MARKET_SYMBOLS: "000001,600519"
-    volumes:
-      - ./data:/data
-      - ./logs:/app/logs
     ports:
-      - "8000:8000"
+      - "${STOCKSTREAM_PORT:-8000}:8000"   # Web API
+      - "${METRICS_PORT:-9090}:9090"        # Prometheus metrics
+    environment:
+      - STOCKSTREAM_ENV=${STOCKSTREAM_ENV:-production}
+      - STOCKSTREAM_HOST=0.0.0.0
+      - STOCKSTREAM_PORT=8000
+      - STOCKSTREAM_LOG_LEVEL=${LOG_LEVEL:-info}
+      # 数据库
+      - STOCKSTREAM_DATABASE__URL=sqlite+aiosqlite:///data/stockstream.db
+      # Redis
+      - STOCKSTREAM_REDIS__URL=redis://redis:6379/0
+      # 直播平台
+      - STOCKSTREAM_LIVE__DOUYIN__COOKIE=${DOUYIN_COOKIE:-}
+      - STOCKSTREAM_LIVE__DOUYIN__ROOM_ID=${DOUYIN_ROOM_ID:-}
+      - STOCKSTREAM_LIVE__DOUYIN__RTMP_URL=${DOUYIN_RTMP_URL:-}
+      # AI 配置
+      - STOCKSTREAM_ANALYSIS__DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      # TTS
+      - STOCKSTREAM_TTS__VOICE=${TTS_VOICE:-zh_CN-huayan-medium}
+      # 推流
+      - STOCKSTREAM_STREAM__RTMP_URL=${RTMP_URL:-}
+    volumes:
+      - stockstream-data:/app/data
+      - stockstream-logs:/app/logs
+      - stockstream-cache:/app/cache
+      - ./config:/app/config:ro
+    networks:
+      - stockstream-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     deploy:
       resources:
         limits:
-          memory: 6g
-    # Enable when TensorRT/GPU inference is added and NVIDIA runtime is configured.
-    # runtime: nvidia
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+
+  # ═══ Redis (可选 — 分布式部署) ═══
+  redis:
+    image: redis:7-alpine
+    container_name: stockstream-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - stockstream-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ═══ PostgreSQL (可选 — 生产环境) ═══
+  postgres:
+    image: postgres:15-alpine
+    container_name: stockstream-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-stockstream}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-stockstream}
+      - POSTGRES_DB=${POSTGRES_DB:-stockstream}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - stockstream-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockstream"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - production
+      - postgres
+
+  # ═══ Prometheus 监控 ═══
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: stockstream-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    networks:
+      - stockstream-net
+    profiles:
+      - monitoring
+
+  # ═══ Grafana 仪表盘 ═══
+  grafana:
+    image: grafana/grafana:latest
+    container_name: stockstream-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - ./config/grafana:/etc/grafana/provisioning:ro
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    networks:
+      - stockstream-net
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+
+# ── Profiles ─────────────────────────────────────────────────────────────
+# 默认:          docker compose up -d                       (仅核心应用)
+# 生产环境:       docker compose --profile production up -d  (含 PostgreSQL)
+# 监控:          docker compose --profile monitoring up -d   (含 Prometheus + Grafana)
+# 全栈:          docker compose --profile production --profile monitoring up -d

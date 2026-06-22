@@ -1,151 +1,138 @@
-# StockStream
+# StockStream v2.0
 
-StockStream is a single-node, modular quantitative trading system scaffold for
-Jetson Xavier NX 8GB, Ubuntu 20.04, and Python 3.10. It is designed to keep the
-runtime footprint below 6GB while leaving a clear extension seam for future
-TensorRT inference.
+> 企业级 AI 数字人财经直播系统 — 采用分层事件驱动架构
 
-## Project directory tree
-
-```text
-stockStream/
-├── Dockerfile
-├── README.md
-├── docker-compose.yml
-├── requirements.txt
-├── data/
-├── logs/
-├── stockstream/
-│   ├── app.py
-│   ├── core/
-│   │   ├── config.py
-│   │   └── orchestrator.py
-│   ├── market/
-│   │   ├── collector.py
-│   │   ├── models.py
-│   │   ├── service.py
-│   │   └── storage.py
-│   ├── selector/
-│   │   ├── indicators.py
-│   │   ├── models.py
-│   │   ├── repository.py
-│   │   └── service.py
-│   ├── tts/
-│   │   └── service.py
-│   ├── agent/
-│   │   └── service.py
-│   ├── stream/
-│   │   └── service.py
-│   ├── danmu/
-│   │   └── service.py
-│   ├── web/
-│   │   └── api.py
-│   ├── database/
-│   │   └── service.py
-│   └── tensorrt/
-│       └── runtime.py
-└── tests/
-```
-
-## Architecture
-
-| Module | Responsibility |
-| --- | --- |
-| `market` | AkShare 东方财富实时行情、资金流向、日线、60分钟线采集、缓存与 tick normalization. |
-| `selector` | Rule-based Top10 建仓、补仓、减仓、清仓 signal selection from cached market data. |
-| `tts` | Local text-to-speech task facade. |
-| `agent` | Strategy assistant orchestration across selector and TTS. |
-| `stream` | Bounded in-memory event bus to control memory usage. |
-| `danmu` | Bullet-comment/live overlay messages. |
-| `web` | FastAPI HTTP and WebSocket interface. |
-| `database` | Local SQLite persistence layer. |
-| `tensorrt` | Lazy extension seam for NVIDIA TensorRT runtime. |
-
-## Resource strategy
-
-- Run one uvicorn worker by default.
-- Use SQLite for single-node deployment to avoid external database memory cost.
-- Use bounded asyncio queues for stream events.
-- Run AkShare blocking calls through `asyncio.to_thread` with low concurrency.
-- Cache market data into local SQLite with WAL mode and upsert semantics.
-- Set Docker Compose memory limit to `6g`.
-- Keep TensorRT imports lazy so the base runtime does not require JetPack-specific
-  packages until inference is enabled.
-
-## Quick start
+## 快速开始
 
 ```bash
-docker compose up --build
-```
-
-Open <http://localhost:8000/health>.
-
-## Local development
-
-```bash
-python3.10 -m venv .venv
-source .venv/bin/activate
+# 安装依赖
 pip install -r requirements.txt
-python -m stockstream.app
+
+# 下载 AI 模型（一键）
+python scripts/download_models.py --all
+# 或单独下载:
+#   --tts    中文 TTS 语音合成 (~60 MB)
+#   --face   SCRFD 人脸检测 (~16 MB)
+#   --wav2lip 查看 Wav2Lip 下载说明 (~1.4 GB, 需手动)
+
+# 配置（可选）
+cp config/.env.example .env
+# 修改 .env 中的 API Key 等配置
+
+# 启动
+python -m src.main
+# 或
+python src/main.py
 ```
 
-## Configuration
+## 架构概览
 
-Environment variables use the `STOCKSTREAM_` prefix:
+```
+src/
+├── core/        基础设施层  (ConfigCenter, EventBus)
+├── storage/     数据持久层  (SQLite/PostgreSQL + 自动迁移)
+├── market/      行情采集    (AkShare)
+├── tts/         语音合成    (Piper TTS)
+├── analysis/    AI 分析     (DeepSeek LLM)
+├── live/        直播运营    (抖音/快手/弹幕/互动/切片)
+├── agents/      AI Agent   (总导演/股票问答)
+├── trading/     自动交易
+├── dashboard/   数据驾驶舱
+├── monitoring/  系统监控
+├── scheduler/   定时调度
+└── main.py      主入口
+```
 
-| Variable | Default | Description |
-| --- | --- | --- |
-| `STOCKSTREAM_HOST` | `0.0.0.0` | API bind host. |
-| `STOCKSTREAM_PORT` | `8000` | API bind port. |
-| `STOCKSTREAM_DB_URL` | `sqlite+aiosqlite:///data/stockstream.db` | SQLite database URL. |
-| `STOCKSTREAM_MAX_MEMORY_MB` | `6144` | Memory budget guardrail. |
-| `STOCKSTREAM_TENSORRT_ENABLED` | `false` | Enables future TensorRT runtime path. |
-| `STOCKSTREAM_STREAM_QUEUE_SIZE` | `1024` | Bounded event queue size. |
-| `STOCKSTREAM_MARKET_POLL_SECONDS` | `5` | AkShare collector refresh interval. |
-| `STOCKSTREAM_MARKET_SQLITE_PATH` | `data/market_cache.db` | SQLite cache path for market data. |
-| `STOCKSTREAM_MARKET_SYMBOLS` | empty | Comma-separated A-share codes for fund-flow and K-line collection. |
+详细架构文档见 [ARCHITECTURE.md](./ARCHITECTURE.md)
 
+## 核心特性
 
-## Market collector
+- **事件总线驱动**: 模块间通过 pub/sub 解耦，禁止直接调用
+- **零循环依赖**: 严格分层，core → storage → business → agents
+- **独立可测试**: 每个模块可单独启动和测试
+- **配置热更新**: YAML/JSON/ENV 三合一，文件变更自动重载
+- **多数据库**: SQLite（开发） / PostgreSQL（生产）无缝切换
+- **自动迁移**: 基于 ORM 模型自动建表
 
-The `market` module uses AkShare Eastmoney interfaces and runs continuously when
-the FastAPI application starts:
+## API 端点
 
-- `stock_zh_a_spot_em()` for 东方财富 A 股实时行情.
-- `stock_individual_fund_flow(stock, market)` for 东方财富个股资金流向.
-- `stock_zh_a_hist(period="daily")` for daily K-line data.
-- `stock_zh_a_hist_min_em(period="60")` for 60-minute K-line data.
+| 端点 | 说明 |
+|------|------|
+| `GET /api/v2/health` | 系统健康检查 |
+| `GET /api/v2/config` | 查看/修改配置 |
+| `GET /api/v2/market/snapshot` | 股票快照 |
+| `POST /api/v2/tts/synthesize` | 语音合成 |
+| `POST /api/v2/analysis/analyze` | AI 分析 |
+| `POST /api/v2/analysis/ask` | 股票问答 |
+| `POST /api/v2/danmu/push` | 弹幕推送 |
+| `GET /api/v2/live/dashboard` | 直播仪表盘 |
+| `GET /api/v2/live/stats` | 直播统计 |
+| `GET /api/v2/trading/portfolio` | 交易持仓 |
+| `POST /api/v2/trading/order` | 下单 |
+| `GET /api/v2/director/rundown` | 总导演节目单 |
+| `POST /api/v2/director/intervene` | 导演干预 |
+| `GET /api/v2/monitor/health` | 模块健康检查 |
+| `GET /api/v2/scheduler/tasks` | 定时任务 |
 
-The collector refreshes every 5 seconds by default, wraps blocking AkShare calls
-in asyncio worker threads, automatically backs off and reconnects after errors,
-and writes normalized JSON payloads into SQLite table `market_cache`.
+## 事件类型
 
-Manual endpoints:
+| 事件 | 来源 | 消费者 |
+|------|------|--------|
+| `market.price_updated` | Market | Selector, Dashboard |
+| `danmu.new` | Danmu | DanmuCenter |
+| `danmu.processed` | DanmuCenter | StockQA, ChiefDirector, Dashboard |
+| `tts.sentence_ready` | TTS | Avatar, ChiefDirector, LiveDashboard |
+| `analysis.complete` | Analysis | ClipGenerator, ChiefDirector |
+| `analysis.qa_answer` | Analysis/StockQA | TTS, LiveDashboard |
+| `live.gift_received` | Platform | GiftEngine |
+| `live.like_received` | Platform | EngagementEngine |
+| `live.follower_change` | Platform | FanTracker |
+| `live.engagement_action` | Engagement | ChiefDirector |
+| `live.gift_action` | Gift | ClipGenerator, ChiefDirector |
+| `live.traffic_action` | Traffic | ChiefDirector |
+| `live.clip_created` | ClipGen | VideoWriter |
+| `trading.filled` | Trading | Dashboard |
+| `director.show_started` | ChiefDirector | System |
+
+## 核心模块
+
+### 男女声对话式直播 (`stockstream/dual_host/`)
+
+AI 财经相声直播间 — 双数字人对话式直播系统：
+
+**双音色 TTS（真实男女声）**：使用两个不同的 Piper 中文模型实现真正不同的音色：
+
+| 角色 | 说话人 | 语音模型 | 音色 | 风格 |
+|------|--------|---------|------|------|
+| 老张 | 男 (超文) | `zh_CN-chaowen-medium.onnx` | 男声 | 沉稳专业 |
+| 小财妹 | 女 (华燕) | `zh_CN-huayan-medium.onnx` | 女声 | 轻快活泼 |
+
+**8 种情绪** × 2 种音色 = 16 种语音参数组合，支持情感驱动语音调制。
+
+**快速启动**:
+```bash
+# 1. 下载男女声模型
+python scripts/download_models.py --tts
+
+# 2. 测试双角色对话 TTS
+python scripts/run_dual_live.py --demo
+
+# 3. 启动完整对话式直播
+python scripts/run_dual_live.py
+```
+
+### 数字人 Avatar (`stockstream/avatar/`)
+
+Wav2Lip 唇形驱动数字人视频生成：
+- 人脸检测: `models/face_detector.onnx`（SCRFD 10G）
+- 唇形生成: `models/wav2lip_gan.onnx`（需手动下载 PyTorch 权重后转换）
+
+## 开发
 
 ```bash
-curl -X POST "http://localhost:8000/market/refresh"
-curl "http://localhost:8000/market/cache/eastmoney_spot?limit=10"
+# 运行测试
+python tests/test_dual_voice_tts.py
+
+# 验证导入
+python -c "from stockstream.dual_host import DualHostService; print('OK')"
 ```
-
-## Selector rules
-
-The `selector` module reads cached Eastmoney realtime quote, fund-flow, and daily
-K-line rows from SQLite, computes MA20/MA60, MACD, RSI, volume shrinkage, and
-fund-flow features, then returns four Top10 lists through `GET /selector/signals`:
-
-- **Top10建仓**: MA20上方, 涨幅2%-5%, MACD金叉, 资金流入, 换手率3%-15%; candidates are sorted by absolute inflow amount descending.
-- **Top10补仓**: MA20偏离≤-5%, RSI<35, 缩量, 机构资金流入; candidates are sorted by absolute institutional inflow amount descending.
-- **Top10减仓**: MA20正偏离>8%, MACD死叉, 资金净流出; candidates are sorted by absolute outflow amount descending.
-- **Top10清仓**: MA20正偏离>8%, close<MA60, MACD死叉, money_flow<0; candidates are sorted by absolute outflow amount descending.
-
-```bash
-curl "http://localhost:8000/selector/signals"
-```
-
-## TensorRT extension plan
-
-1. Install TensorRT from the NVIDIA JetPack repository on Jetson.
-2. Add TensorRT engine loading inside `stockstream/tensorrt/runtime.py`.
-3. Inject the runtime into `selector` or `agent` through `core/orchestrator.py`.
-4. Enable `STOCKSTREAM_TENSORRT_ENABLED=true` and uncomment NVIDIA runtime
-   settings in `docker-compose.yml`.

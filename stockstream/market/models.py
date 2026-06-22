@@ -25,17 +25,22 @@ class StockSymbol:
     market: str
 
     @classmethod
-    def from_code(cls, code: str) -> "StockSymbol":
-        """Infer AkShare market code from a six-digit A-share stock code."""
+    def from_code(cls, raw_code: str) -> StockSymbol:
+        """Infer AkShare market code from a six-digit A-share stock code.
 
-        normalized = code.strip().upper().replace("SH", "").replace("SZ", "").replace("BJ", "")
-        if normalized.startswith(("6", "9")):
+        Rules:
+            - 60xxxx / 68xxxx → 上海 (sh)
+            - 00xxxx / 30xxxx → 深圳 (sz)
+            - 83xxxx / 87xxxx / 43xxxx → 北交所 (bj)
+        """
+        code = raw_code.strip().upper().replace("SH", "").replace("SZ", "").replace("BJ", "")
+        if code.startswith(("6", "9")):
             market = "sh"
-        elif normalized.startswith(("8", "4")):
+        elif code.startswith(("8", "4")):
             market = "bj"
         else:
             market = "sz"
-        return cls(code=normalized, market=market)
+        return cls(code=code, market=market)
 
 
 @dataclass(slots=True, frozen=True)
@@ -73,7 +78,6 @@ class CollectionResult:
 
     def to_event(self) -> dict[str, Any]:
         """Convert the collection summary to a stream event."""
-
         return {
             "type": "market.collection",
             "dataset": self.dataset.value,

@@ -1,0 +1,902 @@
+2026-06-22 06:41:48 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:41:48 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:41:48 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:41:48 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:41:48 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:41:48 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:41:48 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:41:48 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:41:48 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:41:48 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:41:48 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:41:48 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:41:48 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:41:48 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:41:48 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:41:48 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:41:48 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:41:48 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:41:48 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:41:48 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:41:48 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:41:48 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:41:48 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:41:48 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:41:48 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:41:48 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:41:48 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:41:48 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:41:48 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:41:48 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:41:48 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:41:48 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:41:48 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:41:48 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:41:48 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:41:48 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:41:48 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:41:48 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:41:48 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:41:48 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:41:48 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:42:04 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:42:04 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:42:04 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:42:04 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:42:04 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:42:04 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:42:04 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:42:04 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:42:04 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:42:04 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:42:04 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:42:04 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:42:04 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:42:04 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:42:04 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:42:04 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:42:04 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:42:04 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:42:04 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:42:04 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:42:04 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:42:04 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:42:04 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:42:04 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:42:04 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:42:04 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:42:04 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:42:04 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:42:04 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:42:04 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:42:04 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:42:36 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:42:36 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:42:36 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:42:36 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:42:36 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:42:36 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:42:36 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:42:36 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:42:36 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:42:36 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:42:36 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:42:36 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:42:36 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:42:36 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:42:36 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:42:36 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:42:36 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:42:36 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:42:36 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:42:36 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:42:36 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:42:36 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:42:36 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:42:36 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:42:36 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:42:36 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:42:36 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:42:36 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:42:36 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:42:36 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:42:36 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:42:36 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:42:36 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:42:36 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:42:36 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:42:36 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:42:36 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:42:36 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:42:36 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:42:36 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:42:36 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:42:36 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:42:36 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:42:36 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:42:36 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:42:36 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:42:52 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:42:52 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:42:52 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:42:52 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:42:52 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:42:52 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:42:52 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:42:52 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:42:52 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:42:52 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:42:52 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:42:52 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:42:52 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:42:52 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:42:52 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:42:52 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:42:52 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:42:52 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:42:52 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:42:53 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:42:53 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:42:53 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:42:53 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:42:53 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:42:53 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:42:53 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:42:53 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:42:53 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:42:53 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:42:53 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:42:53 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:43:36 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:43:36 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:43:36 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:43:36 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:43:36 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:43:36 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:43:36 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:43:36 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:43:36 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:43:37 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:43:37 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:43:37 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:43:37 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:43:37 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:43:37 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:43:37 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:43:37 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:43:37 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:43:37 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:43:37 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:43:37 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:43:37 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:43:37 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:43:37 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:43:37 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:43:37 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:43:37 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:43:37 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:43:37 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:43:37 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:43:37 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:43:37 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:43:37 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:43:37 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:43:37 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:43:37 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:43:37 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:43:37 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:43:37 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:43:37 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:43:37 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:43:37 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:43:37 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:43:37 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:43:37 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:43:37 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:43:51 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:43:51 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:43:51 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:43:51 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:43:51 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:43:51 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:43:51 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:43:51 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:43:51 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:43:51 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:43:51 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:43:51 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:43:51 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:43:51 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:43:51 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:43:51 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:43:51 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:43:51 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:43:51 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:43:51 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:43:51 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:43:51 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:43:51 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:43:51 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:43:51 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:43:51 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:43:51 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:43:51 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:43:51 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:43:51 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:43:51 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:44:15 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:44:15 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:44:15 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:44:15 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:44:15 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:44:15 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:44:15 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:44:15 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:44:15 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:44:15 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:44:15 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:44:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:44:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:44:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:44:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:44:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:44:15 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:44:15 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:44:15 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:44:15 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:44:15 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:44:15 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:44:15 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:44:15 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:44:15 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:44:15 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:44:15 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:44:15 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:44:15 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:44:15 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:44:15 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:44:15 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:44:15 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:44:15 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:44:15 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:44:15 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:44:15 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:44:15 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:44:15 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:44:15 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:44:15 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:44:15 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:44:15 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:44:15 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:44:15 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:44:15 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:44:26 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:44:26 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:44:26 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:44:26 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:44:26 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:44:26 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:44:26 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:44:26 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:44:26 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:44:26 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:44:26 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:44:26 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:44:26 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:44:26 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:44:26 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:44:26 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:44:26 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:44:26 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:44:26 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:44:26 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:44:26 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:44:26 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:44:26 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:44:26 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:44:26 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:44:26 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:44:26 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:44:26 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:44:26 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:44:26 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:44:26 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:44:57 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:44:57 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:44:57 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:44:57 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:44:57 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:44:57 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:44:57 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:44:57 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:44:57 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:44:57 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:44:57 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:44:57 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:44:57 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:44:57 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:44:57 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:44:57 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:44:57 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:44:57 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:44:57 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:44:57 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:44:57 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:44:57 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:44:57 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:44:57 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:44:57 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:44:57 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:44:57 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:44:57 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:44:57 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:44:57 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:44:57 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:44:57 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:44:57 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:44:57 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:44:57 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:44:57 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:44:57 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:44:57 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:44:57 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:44:57 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:44:57 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:45:12 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:45:12 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:45:12 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:45:12 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:45:12 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:45:12 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:45:12 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:45:12 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:45:12 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:45:12 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:45:12 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:45:12 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:45:12 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:45:12 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:45:12 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:45:12 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:45:12 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:45:12 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:47:27 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:47:27 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:47:27 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:47:27 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:47:27 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:47:27 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:47:27 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:47:27 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:47:27 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:47:27 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:47:27 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:47:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:47:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:47:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:47:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:47:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:47:27 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:47:27 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:47:27 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:47:27 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:47:27 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:47:27 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:47:27 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:47:27 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:47:27 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:47:27 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:47:27 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:47:27 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:47:27 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:47:27 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:47:27 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:47:27 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:47:27 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:47:27 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:47:27 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:47:27 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:47:27 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:47:27 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:47:27 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:47:27 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:47:27 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:47:27 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:47:27 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:47:27 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:47:27 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:47:27 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:47:39 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:47:39 [CRITICAL] src.scheduler.resource: ResourceScheduler: EMERGENCY memory release (90.6%)
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:47:39 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:47:39 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:47:39 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:47:39 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:47:39 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:47:39 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:47:39 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:47:39 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:47:39 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:47:39 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:47:39 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:47:39 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:47:39 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:47:39 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:47:39 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:47:39 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:47:39 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:47:39 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:47:39 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:47:39 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:47:39 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:47:39 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:47:39 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:47:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:47:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:47:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:47:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:47:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:47:39 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:47:39 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:00 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:00 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:00 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:00 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:00 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:00 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:00 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:00 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:00 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:00 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:52:00 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:52:00 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:52:00 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:52:00 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:52:00 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:52:00 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:52:00 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:52:00 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:52:00 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:52:00 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:52:00 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:52:00 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:52:00 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:52:00 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:52:00 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:52:00 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:52:00 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:52:00 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:52:00 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:52:00 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:52:00 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:52:00 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:52:00 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:52:00 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:52:00 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:52:00 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:52:00 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:52:00 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:52:00 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:52:00 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:52:00 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:52:00 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:52:00 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:52:00 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:52:00 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:52:00 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:52:14 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:52:15 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:52:15 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:52:15 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:52:15 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:52:15 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:52:15 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:52:15 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:52:15 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:52:15 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:52:15 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:52:15 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:52:15 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:52:15 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:52:15 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:52:15 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:52:15 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:15 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:52:15 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:15 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:15 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:15 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:15 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:52:15 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:52:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:52:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:52:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:52:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:52:15 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:52:15 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:52:15 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:22 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:22 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:22 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:22 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:22 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:22 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:22 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:22 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:22 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:22 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:52:22 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:52:22 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:52:22 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:52:22 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:52:22 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:52:22 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:52:22 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:52:22 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:52:22 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:52:22 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:52:22 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:52:22 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:52:22 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:52:22 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:52:22 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:52:22 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:52:22 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:52:22 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:52:22 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:52:22 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:52:22 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:52:22 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:52:22 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:52:22 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:52:22 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:52:22 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:52:22 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:52:22 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:52:22 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:52:22 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:52:22 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:52:22 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:52:22 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:52:22 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:52:22 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:52:22 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:52:34 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:52:34 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:52:34 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:52:34 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:52:34 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:52:34 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:52:34 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:52:34 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:52:34 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:52:34 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:52:34 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:52:34 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:52:34 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:52:34 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:52:34 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:52:34 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:52:34 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:34 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:52:34 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:34 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:34 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:34 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:34 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:52:34 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:52:34 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:52:34 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:52:34 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:52:34 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:52:34 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:52:34 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:52:34 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:42 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:42 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:42 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:42 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:42 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:42 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:42 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:42 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:42 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:43 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:52:43 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:52:43 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:52:43 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:52:43 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:52:43 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:52:43 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:52:43 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:52:43 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:52:43 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:52:43 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:52:43 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:52:43 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:52:43 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:52:43 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:52:43 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:52:43 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:52:43 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:52:43 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:52:43 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:52:43 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:52:43 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:52:43 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:52:43 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:52:43 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:52:43 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:52:43 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:52:43 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:52:43 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:52:43 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:52:43 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:52:43 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:52:43 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:52:43 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:52:43 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:52:43 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:52:43 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:52:55 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:52:55 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:52:55 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:52:55 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:52:55 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:52:55 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:52:55 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:52:55 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:52:55 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:52:55 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:52:55 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:52:55 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:52:55 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:52:55 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:52:55 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:52:55 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:52:55 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:52:55 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:52:55 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:52:55 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:52:55 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:52:55 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:52:55 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:52:55 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:52:55 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:52:55 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:52:55 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:52:55 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:52:55 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:52:55 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:52:55 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:58:27 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:58:27 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:58:27 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:58:27 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:58:27 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:58:27 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:58:27 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:58:27 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:58:27 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:58:27 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:58:27 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:58:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:58:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:58:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:58:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:58:27 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:58:27 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:58:27 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 06:58:27 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 06:58:27 [INFO] src.avatar.service: AvatarService started
+2026-06-22 06:58:27 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 06:58:27 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 06:58:27 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 06:58:27 [INFO] src.live.gift: GiftEngine started
+2026-06-22 06:58:27 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 06:58:27 [INFO] src.live.operation: OperationEngine started
+2026-06-22 06:58:27 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 06:58:27 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 06:58:27 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 06:58:27 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 06:58:27 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 06:58:27 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 06:58:27 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 06:58:27 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 06:58:27 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 06:58:27 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 06:58:27 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 06:58:27 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 06:58:27 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 06:58:27 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 06:58:27 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 06:58:27 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 06:58:27 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 06:58:27 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 06:58:27 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 06:58:27 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 06:58:39 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 06:58:39 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 06:58:39 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 06:58:39 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 06:58:39 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 06:58:39 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 06:58:39 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 06:58:39 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 06:58:39 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 06:58:39 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 06:58:39 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 06:58:39 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 06:58:39 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 06:58:39 [INFO] src.market.service: MarketService stopped
+2026-06-22 06:58:39 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 06:58:39 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 06:58:39 [INFO] src.storage.service: StorageService stopped
+2026-06-22 06:58:39 [INFO] src.app: Application v2.0 stopped
+2026-06-22 06:58:39 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 06:58:39 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 06:58:39 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 06:58:39 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 06:58:39 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 06:58:39 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 06:58:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 06:58:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 06:58:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 06:58:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 06:58:39 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 06:58:39 [INFO] src.app: All services wired (35 modules)
+2026-06-22 06:58:39 [INFO] src.storage.service: StorageService stopped
+2026-06-22 07:02:08 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 07:02:08 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 07:02:08 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 07:02:08 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 07:02:08 [INFO] src.storage.service: StorageService stopped
+2026-06-22 07:02:08 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 07:02:08 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 07:02:08 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 07:02:08 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 07:02:09 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 07:02:09 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 07:02:09 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 07:02:09 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 07:02:09 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 07:02:09 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 07:02:09 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 07:02:09 [INFO] src.app: All services wired (35 modules)
+2026-06-22 07:02:09 [INFO] src.core.recovery_manager: RecoveryManager started (5 guards)
+2026-06-22 07:02:09 [INFO] src.avatar.service: AvatarService initialized
+2026-06-22 07:02:09 [INFO] src.avatar.service: AvatarService started
+2026-06-22 07:02:09 [INFO] src.market.service: MarketService started (poll=5.0s)
+2026-06-22 07:02:09 [INFO] src.live.danmu_center: DanmuCenter started
+2026-06-22 07:02:09 [INFO] src.live.engagement: EngagementEngine started
+2026-06-22 07:02:09 [INFO] src.live.gift: GiftEngine started
+2026-06-22 07:02:09 [INFO] src.live.fan_tracker: FanTracker started
+2026-06-22 07:02:09 [INFO] src.live.operation: OperationEngine started
+2026-06-22 07:02:09 [INFO] src.live.traffic: TrafficEngine started (interval=900s)
+2026-06-22 07:02:09 [INFO] src.live.anti_silence: AntiSilenceEngine started (threshold=30s)
+2026-06-22 07:02:09 [INFO] src.live.monetization: MonetizationEngine started (interval=1800s)
+2026-06-22 07:02:09 [INFO] src.live.clip_generator: ClipGenerator started
+2026-06-22 07:02:09 [INFO] src.live.clip_factory: ClipFactory started (output=data\clips)
+2026-06-22 07:02:09 [INFO] src.live.video_writer: VideoWriter started
+2026-06-22 07:02:09 [INFO] src.live.dashboard: LiveDashboard started
+2026-06-22 07:02:09 [INFO] src.dashboard.service: DashboardService started
+2026-06-22 07:02:09 [INFO] src.scheduler.resource: ResourceScheduler started (interval=2.0s)
+2026-06-22 07:02:09 [INFO] src.scheduler.content: ContentScheduler started (cycle=7 types)
+2026-06-22 07:02:09 [INFO] src.scheduler.service: SchedulerService started with 1 tasks
+2026-06-22 07:02:09 [INFO] src.agents.stock_qa: StockQAAgent started
+2026-06-22 07:02:09 [INFO] src.agents.chief_director: ChiefDirector started — auto-pilot engaged
+2026-06-22 07:02:09 [INFO] src.agents.director: DirectorAgent started — AI directing mode
+2026-06-22 07:02:09 [INFO] src.agents.market_review: MarketReviewAgent started
+2026-06-22 07:02:09 [INFO] src.agents.news_engine: NewsEngine started
+2026-06-22 07:02:09 [INFO] src.agents.risk_control: RiskControlCenter started
+2026-06-22 07:02:09 [INFO] src.monitoring.service: MonitoringService started
+2026-06-22 07:02:09 [INFO] src.monitoring.center: MonitoringCenter started (interval=5.0s)
+2026-06-22 07:02:09 [INFO] src.app: Application v2.0 started — 35 modules running
+2026-06-22 07:02:21 [WARNING] src.market.collector: Fetch all failed: HTTPSConnectionPool(host='82.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f12&fs=m%3A0+t%3A6%2Cm%3A0+t%3A80%2Cm%3A1+t%3A2%2Cm%3A1+t%3A23%2Cm%3A0+t%3A81+s%3A2048&fields=f1%2Cf2%2Cf3%2Cf4%2Cf5%2Cf6%2Cf7%2Cf8%2Cf9%2Cf10%2Cf12%2Cf13%2Cf14%2Cf15%2Cf16%2Cf17%2Cf18%2Cf20%2Cf21%2Cf23%2Cf24%2Cf25%2Cf22%2Cf11%2Cf62%2Cf128%2Cf136%2Cf115%2Cf152 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: cache released (count=1)
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: paused task news_engine
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: paused task clip
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: paused task review
+2026-06-22 07:02:21 [INFO] src.agents.director: DirectorAgent: decided → hot_sector (热点板块分析)
+2026-06-22 07:02:21 [INFO] src.monitoring.center: MonitoringCenter stopped
+2026-06-22 07:02:21 [INFO] src.monitoring.service: MonitoringService stopped
+2026-06-22 07:02:21 [INFO] src.agents.risk_control: RiskControlCenter stopped
+2026-06-22 07:02:21 [INFO] src.agents.news_engine: NewsEngine stopped
+2026-06-22 07:02:21 [INFO] src.agents.market_review: MarketReviewAgent stopped
+2026-06-22 07:02:21 [INFO] src.agents.director: DirectorAgent stopped
+2026-06-22 07:02:21 [INFO] src.agents.chief_director: ChiefDirector stopped
+2026-06-22 07:02:21 [INFO] src.scheduler.content: ContentScheduler stopped
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: resumed task news_engine
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: resumed task clip
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler: resumed task review
+2026-06-22 07:02:21 [INFO] src.scheduler.resource: ResourceScheduler stopped
+2026-06-22 07:02:21 [INFO] src.scheduler.service: SchedulerService stopped
+2026-06-22 07:02:21 [INFO] src.live.clip_factory: ClipFactory stopped
+2026-06-22 07:02:21 [INFO] src.market.service: MarketService stopped
+2026-06-22 07:02:21 [INFO] src.avatar.service: AvatarService stopped
+2026-06-22 07:02:21 [INFO] src.core.recovery_manager: RecoveryManager stopped
+2026-06-22 07:02:21 [INFO] src.storage.service: StorageService stopped
+2026-06-22 07:02:21 [INFO] src.app: Application v2.0 stopped
+2026-06-22 07:02:21 [INFO] src.core.log_center: LogCenter initialized: level=INFO dir=logs retention=90d
+2026-06-22 07:02:21 [INFO] src.storage.service: Database migrations completed successfully
+2026-06-22 07:02:21 [INFO] src.storage.service: StorageService started: sqlite
+2026-06-22 07:02:21 [INFO] src.app: Infrastructure initialized (log_center + storage + recovery)
+2026-06-22 07:02:21 [INFO] src.scheduler.content: ContentScheduler: cycle registered (7 types)
+2026-06-22 07:02:21 [INFO] src.agents.knowledge_base: FinanceKnowledgeBase loaded: 30 entries
+2026-06-22 07:02:21 [INFO] src.core.recovery_manager: RecoveryManager registered guard: market (max_retries=5)
+2026-06-22 07:02:21 [INFO] src.core.recovery_manager: RecoveryManager registered guard: tts (max_retries=3)
+2026-06-22 07:02:21 [INFO] src.core.recovery_manager: RecoveryManager registered guard: stream (max_retries=10)
+2026-06-22 07:02:21 [INFO] src.core.recovery_manager: RecoveryManager registered guard: avatar (max_retries=3)
+2026-06-22 07:02:21 [INFO] src.core.recovery_manager: RecoveryManager registered guard: analysis (max_retries=5)
+2026-06-22 07:02:21 [INFO] src.app: All services wired (35 modules)
+2026-06-22 07:02:21 [INFO] src.storage.service: StorageService stopped

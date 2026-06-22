@@ -1,0 +1,66 @@
+# StockStream v2.0 — Docker Compose for Jetson Xavier NX
+# 一键启动: docker compose -f docker-compose.jetson.yml up -d
+
+version: "3.9"
+
+networks:
+  stockstream-net:
+    driver: bridge
+
+volumes:
+  stockstream-data:
+  stockstream-logs:
+  stockstream-cache:
+
+services:
+  stockstream:
+    build:
+      context: .
+      dockerfile: Dockerfile.jetson
+      target: jetson
+    image: stockstream:jetson-latest
+    container_name: stockstream-app
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      - STOCKSTREAM_ENV=production
+      - STOCKSTREAM_HOST=0.0.0.0
+      - STOCKSTREAM_PORT=8000
+      - NVIDIA_VISIBLE_DEVICES=all
+      - STOCKSTREAM_AVATAR__ENABLED=true
+    ports:
+      - "8000:8000"
+      - "9090:9090"
+    volumes:
+      - stockstream-data:/app/data
+      - stockstream-logs:/app/logs
+      - stockstream-cache:/app/cache
+      - ./config:/app/config:ro
+      - ./models:/app/models:ro
+      - /usr/local/cuda:/usr/local/cuda:ro
+      - /proc/device-tree:/proc/device-tree:ro
+      - /sys/devices:/sys/devices:ro
+    networks:
+      - stockstream-net
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 7G
+        reservations:
+          cpus: '4'
+          memory: 4G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"

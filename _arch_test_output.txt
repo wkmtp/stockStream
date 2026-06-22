@@ -1,0 +1,97 @@
+
+=== Part 1: Module Imports ===
+  [PASS] Import src
+  [PASS] Import src.core
+  [PASS] Import src.core.config_center
+  [PASS] Import src.core.event_bus
+  [PASS] Import src.core.base
+  [PASS] Import src.storage
+  [PASS] Import src.storage.service
+  [PASS] Import src.storage.models
+  [PASS] Import src.market
+  [PASS] Import src.market.service
+  [PASS] Import src.market.collector
+  [PASS] Import src.market.models
+  [PASS] Import src.tts
+  [PASS] Import src.tts.service
+  [PASS] Import src.tts.models
+  [PASS] Import src.analysis
+  [PASS] Import src.analysis.service
+  [PASS] Import src.analysis.models
+  [PASS] Import src.danmu
+  [PASS] Import src.danmu.service
+  [PASS] Import src.trading
+  [PASS] Import src.trading.service
+  [PASS] Import src.trading.models
+  [PASS] Import src.avatar
+  [PASS] Import src.avatar.service
+  [PASS] Import src.selector
+  [PASS] Import src.selector.service
+  [PASS] Import src.selector.models
+  [PASS] Import src.dashboard
+  [PASS] Import src.dashboard.service
+  [PASS] Import src.monitoring
+  [PASS] Import src.monitoring.service
+  [PASS] Import src.scheduler
+  [PASS] Import src.scheduler.service
+  [PASS] Import src.live
+  [PASS] Import src.live.platform_gateway
+  [PASS] Import src.live.danmu_center
+  [PASS] Import src.live.engagement
+  [PASS] Import src.live.gift
+  [PASS] Import src.live.fan_tracker
+  [PASS] Import src.live.operation
+  [PASS] Import src.live.traffic
+  [PASS] Import src.live.anti_silence
+  [PASS] Import src.live.monetization
+  [PASS] Import src.live.clip_generator
+  [PASS] Import src.live.video_writer
+  [PASS] Import src.live.dashboard
+  [PASS] Import src.agents
+  [PASS] Import src.agents.chief_director
+  [PASS] Import src.agents.stock_qa
+
+=== Part 2: Circular Dependency Check ===
+  [PASS] Full import chain no cycles
+
+=== Part 3: ConfigCenter ===
+  [PASS] Config loaded defaults
+  [PASS] Config get nested
+  [PASS] Config get default
+  [PASS] Config get_section
+  [PASS] Config get_section market
+  [PASS] Config update runtime
+  [PASS] Config validate required
+
+=== Part 4: EventBus ===
+  [FAIL] Event delivery
+  [PASS] Event data matches
+  [PASS] Event source
+  [PASS] Event category
+  [PASS] Event stats total
+  [FAIL] Event stats delivered
+  [PASS] Wildcard subscription
+  [PASS] Event bus clear
+
+=== Part 5: StorageService ===
+Traceback (most recent call last):
+  File "d:\ai\stock\stockStream\_test_arch.py", line 233, in <module>
+    asyncio.get_event_loop().run_until_complete(test_storage())
+  File "C:\Users\wkmtp\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "d:\ai\stock\stockStream\_test_arch.py", line 201, in test_storage
+    await svc.start()
+  File "D:\ai\stock\stockStream\src\storage\service.py", line 454, in start
+    self._engine = create_async_engine(
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\wkmtp\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\ext\asyncio\engine.py", line 120, in create_async_engine
+    sync_engine = _create_engine(url, **kw)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 2, in create_engine
+  File "C:\Users\wkmtp\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\wkmtp\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\create.py", line 697, in create_engine
+    raise TypeError(
+TypeError: Invalid argument(s) 'pool_size' sent to create_engine(), using configuration SQLiteDialect_aiosqlite/StaticPool/Engine.  Please check that the keyword arguments are appropriate for this combination of components.

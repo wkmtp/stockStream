@@ -1,0 +1,103 @@
+# StockStream v2.0 基础配置
+# 环境变量优先级最高: STOCKSTREAM_MARKET__POLL_SECONDS=10
+
+# ── 系统 ──
+host: "0.0.0.0"
+port: 8000
+workers: 1
+log_level: "info"
+
+# ── 数据库 ──
+database:
+  url: "sqlite+aiosqlite:///data/stockstream.db"
+  pool_size: 5
+  pool_pre_ping: true
+  auto_migrate: true
+
+# ── 行情采集 ──
+market:
+  poll_seconds: 5
+  sqlite_path: "data/market_cache.db"
+  symbols:
+    - "600519"
+    - "000001"
+    - "300750"
+
+# ── TTS 语音合成 ──
+tts:
+  voice: "zh_CN-huayan-medium"
+  model_path: "models/zh_CN-huayan-medium.onnx"
+  # 双角色模型路径 (男声/女声使用不同ONNX模型，实现真正的双音色)
+  voice_male: "zh_CN-chaowen-medium"
+  model_path_male: "models/zh_CN-chaowen-medium.onnx"
+  voice_female: "zh_CN-huayan-medium"
+  model_path_female: "models/zh_CN-huayan-medium.onnx"
+  sample_rate: 22050
+  length_scale: 1.0
+  noise_scale: 0.667
+  noise_w: 0.8
+  sentence_silence: 0.2
+
+# ── 推流 ──
+stream:
+  rtmp_url: ""
+  queue_size: 1024
+  video_codec: "libx264"
+  fps: 25
+
+# ── AI 分析 ──
+analysis:
+  deepseek_api_key: ""
+  deepseek_model: "deepseek-chat"
+  deepseek_timeout: 30.0
+
+# ── 交易 ──
+trader:
+  capital: 3000.0
+  portfolio_path: "data/portfolio.json"
+  tick_seconds: 10.0
+  auto_open: true
+  auto_add: true
+  auto_reduce: false
+  auto_clear: true
+
+# ── 数字人 ──
+avatar:
+  enabled: false
+  host_image: "data/host.png"
+  face_detector_onnx: "models/face_detector.onnx"
+  wav2lip_onnx: "models/wav2lip_gan.onnx"
+  fps: 25
+  face_batch_size: 128
+  output_dir: "data/avatar"
+  auto_generate: true
+
+# ── 直播运营 ──
+live:
+  douyin:
+    cookie: ""
+    room_id: ""
+    rtmp_url: ""
+  kuaishou:
+    cookie: ""
+    room_id: ""
+
+# ── Agents ──
+agents:
+  chief_director:
+    segment_duration: 120
+    market_analysis_interval: 300
+    silence_threshold: 30
+    traffic_interval_minutes: 15
+    monetization_interval_minutes: 30
+
+# ── 监控 ──
+monitoring:
+  metrics_port: 9090
+  health_check_interval: 30
+  log_retention_days: 7
+
+# ── 调度 ──
+scheduler:
+  timezone: "Asia/Shanghai"
+  market_open_check_seconds: 60

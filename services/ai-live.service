@@ -1,0 +1,47 @@
+[Unit]
+Description=AI Live Stock Stream - 全自动财经直播系统
+Documentation=https://github.com/stockstream/stockStream
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=stockstream
+Group=stockstream
+WorkingDirectory=/opt/stockstream
+EnvironmentFile=/etc/stockstream/.env
+ExecStartPre=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml pull
+ExecStart=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml up
+ExecStop=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml down
+ExecReload=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml restart
+Restart=on-failure
+RestartSec=10s
+StartLimitInterval=300
+StartLimitBurst=3
+
+# 资源限制（Jetson Xavier NX 8GB）
+MemoryHigh=6G
+MemoryMax=7G
+CPUQuota=500%
+TasksMax=512
+
+# 日志
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ai-live
+
+# 安全加固
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/stockstream/data /opt/stockstream/logs /opt/stockstream/cache
+ReadOnlyPaths=/opt/stockstream/config
+
+# cgroup 内存压力通知
+MemoryPressureWatch=on
+MemoryPressureThresholdSec=30s
+
+[Install]
+WantedBy=multi-user.target
