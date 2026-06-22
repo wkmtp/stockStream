@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 import time
 from dataclasses import dataclass, field
 from datetime import date, datetime, timezone
@@ -26,6 +27,9 @@ from enum import Enum
 from src.core.event_bus import EventBus, get_event_bus
 
 logger = logging.getLogger(__name__)
+
+# ── 24h 稳定性常量 ──
+_MAX_REPORTS = 365  # 最多保留 1 年的每日报告
 
 
 # ── Types ─────────────────────────────────────────────────────────────────
@@ -176,15 +180,20 @@ class MarketReviewAgent:
 
         bus = await self.bus
 
+        # 24h 稳定性：记录所有订阅句柄，stop() 时取消
+        self._subs: list[tuple[str, object]] = []
+
         # 订阅收盘信号
         @bus.on("market.close")
         async def _on_market_close(event):
             await self._on_market_close()
+        self._subs.append(("market.close", _on_market_close))
 
         # 手动触发
         @bus.on("review.manual_trigger")
         async def _on_manual(event):
             await self.generate_daily_review()
+        self._subs.append(("review.manual_trigger", _on_manual))
 
         logger.info("MarketReviewAgent started")
 
@@ -197,6 +206,13 @@ class MarketReviewAgent:
                 await self._task
             except asyncio.CancelledError:
                 pass
+
+        # 24h 稳定性：取消所有 EventBus 订阅
+        bus = await self.bus
+        for pattern, handler in getattr(self, '_subs', []):
+            bus.unsubscribe(pattern, handler)
+        self._subs = []
+
         logger.info("MarketReviewAgent stopped")
 
     async def _schedule_loop(self) -> None:
@@ -261,6 +277,8 @@ class MarketReviewAgent:
         )
 
         self._reports.append(review)
+        if len(self._reports) > _MAX_REPORTS:
+            self._reports = self._reports[-_MAX_REPORTS:]
         self._today_report = review
 
         # 5. 推送报告

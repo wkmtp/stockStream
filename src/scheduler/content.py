@@ -28,6 +28,9 @@ from src.core.event_bus import EventBus, get_event_bus
 
 logger = logging.getLogger(__name__)
 
+# ── 24h 稳定性常量 ──
+_MAX_POOL_PER_TYPE = 200  # 每种内容类型池子上限
+
 
 # ── Types ─────────────────────────────────────────────────────────────────
 
@@ -147,6 +150,9 @@ class ContentScheduler:
         """向内容池添加内容段。"""
         pool = self._content_pool.get(segment.content_type, [])
         pool.append(segment)
+        # 24h 稳定性：限制每类型池大小，防止内存无限增长
+        if len(pool) > _MAX_POOL_PER_TYPE:
+            del pool[:len(pool) - _MAX_POOL_PER_TYPE]
         # 按优先级排序
         pool.sort(key=lambda s: -s.priority)
 
@@ -164,6 +170,9 @@ class ContentScheduler:
 
         bus = await self.bus
 
+        # 24h 稳定性：记录所有订阅句柄，stop() 时取消
+        self._subs: list[tuple[str, object]] = []
+
         # 订阅导演指令
         @bus.on("director.action")
         async def _on_director_action(event):
@@ -171,11 +180,13 @@ class ContentScheduler:
             action = data.get("action", "")
             if action:
                 await self._handle_director_action(action, data)
+        self._subs.append(("director.action", _on_director_action))
 
         # 订阅跳过请求
         @bus.on("content.skip")
         async def _on_skip(event):
             self._segments_skipped += 1
+        self._subs.append(("content.skip", _on_skip))
 
         logger.info("ContentScheduler started (cycle=%d types)", len(self._cycle))
 
@@ -188,6 +199,13 @@ class ContentScheduler:
                 await self._task
             except asyncio.CancelledError:
                 pass
+
+        # 24h 稳定性：取消所有 EventBus 订阅
+        bus = await self.bus
+        for pattern, handler in getattr(self, '_subs', []):
+            bus.unsubscribe(pattern, handler)
+        self._subs = []
+
         logger.info("ContentScheduler stopped")
 
     # ── Main Loop ───────────────────────────────────────────────────

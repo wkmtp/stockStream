@@ -17,10 +17,15 @@ import logging
 import os
 import shutil
 import tempfile
+import time as _time
 import uuid
 from pathlib import Path
 
 from typing import Any
+
+# ── 24h 稳定性常量 ──
+_TTS_CACHE_MAX_AGE_HOURS = 24   # WAV 缓存最长保留 24 小时
+_TTS_CACHE_MAX_FILES = 1000     # 缓存文件数上限（防止 inode 耗尽）
 
 from stockstream.tts.models import TTSVoice
 
@@ -68,9 +73,14 @@ class PiperEngine:
         self.voice = voice or TTSVoice()
         self._py_voice = None  # PiperVoice instance
         self._ready = False
+        self._wav_count = 0     # 24h stability: track WAVs produced this session
 
     async def initialize(self) -> None:
         """Load the voice model (Python bindings path only)."""
+        # 24h: 幂等性保护 — 防止重复加载导致内存泄漏
+        if self._ready:
+            return
+
         if not _py_piper_ok and not _piper_cli_path:
             logger.info("PiperEngine: no backend available (dry-run mode)")
             self._ready = True
@@ -149,6 +159,11 @@ class PiperEngine:
         filename = f"{uuid.uuid4().hex[:12]}.wav"
         out_path = out_dir / filename
 
+        # 24h 稳定性：每生成 50 个 WAV 后触发一次缓存清理
+        self._wav_count += 1
+        if self._wav_count % 50 == 0:
+            await asyncio.to_thread(_cleanup_tts_cache, str(out_dir))
+
         # Try Python bindings first
         if self._py_voice is not None:
             return await self._synthesize_python(text, str(out_path), active_voice)
@@ -198,9 +213,20 @@ class PiperEngine:
             return stdout
         except asyncio.TimeoutError:
             logger.error("Piper stream timed out for %d chars", len(text))
+            # 24h: 超时后必须 kill 子进程，防止僵尸进程累积
+            try:
+                proc.kill()
+                await proc.wait()
+            except Exception:
+                pass
             return b""
         except Exception as exc:
             logger.error("Piper stream exception: %s", exc)
+            try:
+                proc.kill()
+                await proc.wait()
+            except Exception:
+                pass
             return b""
 
     # ── internal ─────────────────────────────────────────────────────
@@ -258,12 +284,23 @@ class PiperEngine:
             return out_path
         except asyncio.TimeoutError:
             logger.error("Piper CLI timed out for %d chars", len(text))
+            # 24h: 超时后必须 kill 子进程，防止僵尸进程累积
+            try:
+                proc.kill()
+                await proc.wait()
+            except Exception:
+                pass
             return ""
         except FileNotFoundError:
             logger.error("Piper binary not found: %s", _piper_cli_path)
             return ""
         except Exception as exc:
             logger.error("Piper CLI exception: %s", exc)
+            try:
+                proc.kill()
+                await proc.wait()
+            except Exception:
+                pass
             return ""
 
     def _resolve_model(self) -> str:
@@ -291,6 +328,15 @@ class PiperEngine:
         """Return True if any synthesis backend is available."""
         return _py_piper_ok or bool(_piper_cli_path)
 
+    @staticmethod
+    def cleanup_cache(output_dir: str | None = None) -> int:
+        """清理过期的 TTS WAV 缓存文件。返回删除的文件数。
+
+        24h 稳定性：防止 WAV 文件堆积导致磁盘满。
+        """
+        target = Path(output_dir) if output_dir else Path(tempfile.gettempdir()) / "stockstream_tts"
+        return _cleanup_tts_cache(str(target))
+
 
 # ── Python-bindings helper ────────────────────────────────────────────
 
@@ -316,3 +362,38 @@ def _py_synth_to_wav(voice: Any, text: str, out_path: str) -> bool:  # pyright: 
     except Exception as exc:
         logger.error("_py_synth_to_wav failed: %s", exc)
         return False
+
+
+# ── 24h 稳定性: TTS 缓存清理 ──────────────────────────────────────
+
+
+def _cleanup_tts_cache(dir_path: str) -> int:
+    """同步清理过期的 WAV 缓存文件（在 asyncio.to_thread 中运行）。"""
+    import os as _sync_os
+    target = Path(dir_path)
+    if not target.is_dir():
+        return 0
+
+    now = _time.time()
+    max_age = _TTS_CACHE_MAX_AGE_HOURS * 3600
+    removed = 0
+
+    try:
+        files = sorted(target.glob("*.wav"), key=lambda p: p.stat().st_mtime)
+        for f in files:
+            age = now - f.stat().st_mtime
+            # 超过最大保留时间或超出文件数上限
+            if age > max_age or len(files) - removed > _TTS_CACHE_MAX_FILES:
+                try:
+                    _sync_os.unlink(f)
+                    removed += 1
+                except OSError:
+                    pass
+            elif age <= max_age and len(files) - removed <= _TTS_CACHE_MAX_FILES:
+                break  # 剩下的文件都在有效期内且未超限
+    except Exception:
+        logger.debug("TTS cache cleanup failed for %s", dir_path)
+
+    if removed:
+        logger.debug("TTS cache cleaned: %d WAVs removed from %s", removed, dir_path)
+    return removed

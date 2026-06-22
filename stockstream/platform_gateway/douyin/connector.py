@@ -267,7 +267,7 @@ class DouyinConnector(BasePlatformConnector):
         except asyncio.CancelledError:
             raise
         except Exception:
-            logger.debug("Douyin poll detail", exc_info=True)
+            logger.warning("Douyin poll detail error", exc_info=True)
 
         return events
 
@@ -362,7 +362,7 @@ class DouyinConnector(BasePlatformConnector):
             except asyncio.CancelledError:
                 break
             except Exception:
-                logger.debug("Douyin heartbeat error", exc_info=True)
+                logger.warning("Douyin heartbeat error", exc_info=True)
 
     # ── Public API ────────────────────────────────────────────
 

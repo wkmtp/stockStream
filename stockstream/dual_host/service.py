@@ -143,6 +143,7 @@ class DualHostService:
         self._running = False
         self._task: asyncio.Task[None] | None = None
         self._script_history: list[DialogueScript] = []
+        self._script_history_max: int = 200  # 24h: 防止无界增长
         self._current_watch_list: list[str] = []
         self._segment_tasks: dict[str, asyncio.Task] = {}
         self._started_at: float = 0.0
@@ -208,6 +209,9 @@ class DualHostService:
 
             if script:
                 self._script_history.append(script)
+                # 24h: 限制历史记录最多 200 条，超出时截断最早的一半
+                if len(self._script_history) > self._script_history_max:
+                    self._script_history = self._script_history[-100:]
                 await self._deliver_script(script)
 
         except Exception as exc:
@@ -298,8 +302,8 @@ class DualHostService:
             try:
                 result = await self.analysis.analyze("机器人概念", mode="sector")
                 context.update(result.context if hasattr(result, 'context') else {})
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("DualHost: sector analysis failed, using defaults — %s", exc)
         return self.dialogue_gen.generate_sector_dialogue(context)
 
     def _generate_humor_segment(self) -> DialogueScript:
@@ -329,8 +333,8 @@ class DualHostService:
             try:
                 result = await self.analysis.analyze_market()
                 context = result.context if hasattr(result, 'context') else {}
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("DualHost: market review analysis failed, using fallback — %s", exc)
         if not context:
             context = {"query": "大盘", "up_count": 1200, "down_count": 800, "avg_change_pct": 0.5}
         return self.dialogue_gen.generate_market_review(context)
@@ -407,7 +411,9 @@ class DualHostService:
         # TTS synthesis (if enabled)
         if self.dual_tts and self.tts:
             task_id = f"dh_{script.segment_id}"
-            asyncio.create_task(self._synthesize_script(task_id, script))
+            # 24h: 追踪 fire-and-forget task，以便在 stop() 时正确 cancel
+            t = asyncio.create_task(self._synthesize_script(task_id, script))
+            self._segment_tasks[task_id] = t
 
     async def _synthesize_script(self, task_id: str, script: DialogueScript) -> None:
         """Background TTS synthesis for a dialogue script.
@@ -443,6 +449,9 @@ class DualHostService:
             logger.debug("TTS cancelled for %s", task_id)
         except Exception as exc:
             logger.error("TTS synthesis failed for %s: %s", task_id, exc)
+        finally:
+            # 24h: 清理已完成/已取消的 task 引用，防止内存泄漏
+            self._segment_tasks.pop(task_id, None)
 
     # ── public API ──────────────────────────────────────────────
 

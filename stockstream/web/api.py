@@ -75,15 +75,32 @@ def create_app(services: Services) -> FastAPI:
                 await cleanup_task
             except asyncio.CancelledError:
                 pass
-            await services.dashboard_engine.stop()
-            await services.heatmap_engine.stop()
-            await services.avatar.stop_auto()
-            await services.avatar.close()
-            await services.agent.stop_auto_trading()
-            await services.market.stop_collector()
-            await services.database.close()
+            # 24h: 保护每个 stop() 调用，防止一个失败撑跳后续清理（数据库连接必须关闭）
+            for name, coro in [
+                ("dashboard_engine", services.dashboard_engine.stop()),
+                ("heatmap_engine", services.heatmap_engine.stop()),
+                ("avatar.stop_auto", services.avatar.stop_auto()),
+                ("avatar.close", services.avatar.close()),
+                ("agent.stop_auto_trading", services.agent.stop_auto_trading()),
+                ("market.stop_collector", services.market.stop_collector()),
+                ("database.close", services.database.close()),
+            ]:
+                try:
+                    await coro
+                except Exception as exc:
+                    logger.warning("Shutdown: %s failed — %s", name, exc)
 
     app = FastAPI(title="StockStream", version="0.1.0", lifespan=lifespan)
+
+    # 24h 稳定性：添加 CORS 中间件（允许所有来源，生产环境应限制）
+    from fastapi.middleware.cors import CORSMiddleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     # Global exception handler middleware
     @app.middleware("http")
@@ -2459,7 +2476,14 @@ async def director_intervene(request: Request) -> dict[str, Any]:
         priority=priority,
         reason=f"Manual intervention: {payload.get('reason', 'operator override')}",
     )
-    await request.app.state.services.chief_director._intervention_queue.put(decision)
+    # 24h: 队列满时丢弃旧条目，防止 HTTP 请求永久阻塞
+    queue = request.app.state.services.chief_director._intervention_queue
+    if queue.full():
+        try:
+            queue.get_nowait()
+        except asyncio.QueueEmpty:
+            pass
+    await queue.put(decision)
     return {"status": "queued", "decision": decision.to_dict()}
 
 
@@ -2472,6 +2496,24 @@ async def live_events_ws(websocket: WebSocket) -> None:
     services: Services = websocket.app.state.services
     gw = services.platform_gateway
     await gw.start_all()
+
+    # 24h 稳定性：心跳检测，连续3次失败才关闭
+    ping_interval = 30.0
+    ping_failures = 0
+    async def _ping_loop():
+        nonlocal ping_failures
+        while True:
+            await asyncio.sleep(ping_interval)
+            try:
+                await asyncio.wait_for(websocket.send_json({"type": "ping"}), timeout=5.0)
+                ping_failures = 0
+            except Exception:
+                ping_failures += 1
+                if ping_failures >= 3:
+                    logger.debug("Live events WS: ping failed %d times, closing", ping_failures)
+                    break
+
+    ping_task = asyncio.create_task(_ping_loop())
     try:
         async for event in gw.events():
             try:
@@ -2483,6 +2525,11 @@ async def live_events_ws(websocket: WebSocket) -> None:
     except Exception as exc:
         logger.debug("Live events WS disconnected: %s", exc)
     finally:
+        ping_task.cancel()
+        try:
+            await ping_task
+        except asyncio.CancelledError:
+            pass
         try:
             await websocket.close()
         except Exception:
@@ -2497,6 +2544,7 @@ async def stream_events(websocket: WebSocket) -> None:
     await websocket.accept()
     services: Services = websocket.app.state.services
     ping_interval = 30.0
+    ping_failures = 0
     try:
         while True:
             try:
@@ -2504,12 +2552,16 @@ async def stream_events(websocket: WebSocket) -> None:
                     services.stream.next_event(), timeout=ping_interval,
                 )
                 await websocket.send_json(event)
+                ping_failures = 0
             except asyncio.TimeoutError:
                 # Send keep-alive ping
                 try:
                     await websocket.send_json({"type": "ping"})
+                    ping_failures = 0
                 except Exception:
-                    break
+                    ping_failures += 1
+                    if ping_failures >= 3:
+                        break
             except asyncio.CancelledError:
                 break
     except Exception as exc:

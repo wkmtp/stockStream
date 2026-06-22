@@ -291,7 +291,12 @@ class LiveCompositor:
             logger.exception("LiveCompositor pipeline error: %s", exc)
             self.state.error = str(exc)
         finally:
-            cap.release()
+            # 24h: 检查 cap 是否存在再 release，防止摄像头初始化失败导致二次异常
+            if cap is not None:
+                try:
+                    cap.release()
+                except Exception:
+                    logger.debug("LiveCompositor: cap.release() failed")
             self._kill_ffmpeg()
             logger.info("LiveCompositor stopped (frames=%d)", self.state.frame_count)
 
@@ -356,7 +361,8 @@ class LiveCompositor:
             self._process.stdin.write(frame.tobytes())
         except (BrokenPipeError, OSError) as exc:
             logger.warning("FFmpeg pipe write failed: %s", exc)
-            self._process = None
+            # 24h: 写入失败时必须清理子进程，防止孤儿进程
+            self._kill_ffmpeg()
 
     def _kill_ffmpeg(self) -> None:
         """Kill the FFmpeg subprocess."""
@@ -365,7 +371,7 @@ class LiveCompositor:
         try:
             self._process.stdin.close()
         except Exception:
-            pass
+            logger.debug("FFmpeg stdin close failed during kill")
         try:
             self._process.terminate()
             self._process.wait(timeout=3)
@@ -383,7 +389,7 @@ class LiveCompositor:
             for _ in self._process.stderr:
                 pass
         except Exception:
-            pass
+            logger.debug("FFmpeg stderr drain exception during compositor cleanup")
 
 
 # ── pre-render compositor (for VOD / non-realtime) ──────────────────────

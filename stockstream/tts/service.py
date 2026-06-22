@@ -72,7 +72,7 @@ class TTSService:
     ) -> None:
         self.engine = PiperEngine(voice=voice)
         self._on_sentence = on_sentence
-        self._task_queue: asyncio.Queue[TTSTask] = asyncio.Queue()
+        self._task_queue: asyncio.Queue[TTSTask] = asyncio.Queue(maxsize=200)  # 24h: 防止无界增长
         self._play_events: asyncio.Queue[TTSPlayEvent] = asyncio.Queue(maxsize=256)
         self._active_tasks: dict[str, TTSTask] = {}
         self._max_cached_tasks = max_cached_tasks
@@ -84,6 +84,9 @@ class TTSService:
 
     async def initialize(self) -> None:
         """Load Piper engine and start the synthesis worker."""
+        # 24h: 幂等性保护 — 防止创建多个 worker task
+        if self._running:
+            return
         await self.engine.initialize()
         self._running = True
         self._worker_task = asyncio.create_task(self._worker())
@@ -98,6 +101,7 @@ class TTSService:
                 await self._worker_task
             except asyncio.CancelledError:
                 pass
+        self._worker_task = None  # 24h: 清除引用，防止僵尸引用混淆
         logger.info("TTSService stopped")
 
     # ── public API ───────────────────────────────────────────────────

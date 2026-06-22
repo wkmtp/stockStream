@@ -1059,7 +1059,7 @@ class SceneManager:
                         target_rgba = cv2.resize(result.rgba, (width_px, height_px))
                         return target_rgba
         except Exception:
-            pass
+            logger.debug("SceneManager: slide cache lookup failed, using fallback")
 
         # Fallback: dark placeholder with label
         import cv2
@@ -1102,7 +1102,7 @@ class SceneManager:
                     target = cv2.resize(rgba, (width_px, height_px))
                     return target
         except Exception:
-            pass
+            logger.debug("SceneManager: dashboard cache lookup failed, using fallback")
 
         # Fallback: dark placeholder
         import cv2

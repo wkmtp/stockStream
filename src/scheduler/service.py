@@ -2,6 +2,7 @@
 from __future__ import annotations
 import asyncio
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import Callable, Coroutine
 
@@ -60,7 +61,6 @@ class SchedulerService:
         async def _run_loop():
             bus = await self.bus
             while self._running:
-                import time
                 now = time.time()
                 for task in list(self._tasks.values()):
                     if not task.enabled:

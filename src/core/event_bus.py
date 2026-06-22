@@ -121,6 +121,8 @@ class EventBus:
         self._stats = EventStats()
         self._lock = asyncio.Lock()
         self._running = False
+        self._pending_tasks: set[asyncio.Task] = set()
+        self._max_pending_tasks = 200  # 24h 稳定性：限制并发 emit_async 任务数
 
     # ── Subscribe ──────────────────────────────────────────────────
 
@@ -243,8 +245,18 @@ class EventBus:
         priority: int = 0,
         correlation_id: str = "",
     ) -> None:
-        """异步发布事件（不等待订阅者处理完毕，fire-and-forget）。"""
-        asyncio.create_task(self.emit(event_type, data, source, priority, correlation_id))
+        """异步发布事件（不等待订阅者处理完毕，fire-and-forget）。
+
+        24h 稳定性：限制并发 fire-and-forget 任务数，防止 Task 泄漏。
+        """
+        # 清理已完成的任务
+        self._pending_tasks = {t for t in self._pending_tasks if not t.done()}
+        if len(self._pending_tasks) >= self._max_pending_tasks:
+            logger.warning("EventBus: emit_async task limit reached (%d), dropping event %s",
+                          self._max_pending_tasks, event_type)
+            return
+        task = asyncio.create_task(self.emit(event_type, data, source, priority, correlation_id))
+        self._pending_tasks.add(task)
 
     # ── Query ──────────────────────────────────────────────────────
 
@@ -276,6 +288,10 @@ class EventBus:
         self._subscribers.clear()
         self._history.clear()
         self._stats = EventStats()
+        for t in list(self._pending_tasks):
+            if not t.done():
+                t.cancel()
+        self._pending_tasks.clear()
 
     # ── Internal ───────────────────────────────────────────────────
 

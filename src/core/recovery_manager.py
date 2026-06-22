@@ -113,6 +113,8 @@ class RecoveryManager:
         self._guards[name] = guard
 
         if health_check_fn:
+            if not hasattr(self, '_health_checks'):
+                self._health_checks = {}
             self._health_checks[name] = health_check_fn
 
         logger.info("RecoveryManager registered guard: %s (max_retries=%d)",
@@ -132,15 +134,21 @@ class RecoveryManager:
         self._task = asyncio.create_task(self._loop())
 
         bus = await self.bus
+
+        # 24h 稳定性：记录所有订阅句柄，stop() 时取消
+        self._subs: list[tuple[str, object]] = []
+
         # 监听告警事件
         @bus.on("monitoring.alert")
         async def _on_alert(event):
             await self._handle_alert(event)
+        self._subs.append(("monitoring.alert", _on_alert))
 
         # 监听流状态变化
         @bus.on("stream.status_changed")
         async def _on_stream_status(event):
             await self._handle_stream_status(event)
+        self._subs.append(("stream.status_changed", _on_stream_status))
 
         logger.info("RecoveryManager started (%d guards)", len(self._guards))
 
@@ -153,6 +161,13 @@ class RecoveryManager:
                 await self._task
             except asyncio.CancelledError:
                 pass
+
+        # 24h 稳定性：取消所有 EventBus 订阅
+        bus = await self.bus
+        for pattern, handler in getattr(self, '_subs', []):
+            bus.unsubscribe(pattern, handler)
+        self._subs = []
+
         logger.info("RecoveryManager stopped")
 
     # ── Core Loop ───────────────────────────────────────────────────
@@ -358,5 +373,4 @@ class RecoveryManager:
                 if g.state == RecoveryState.FAILED]
 
     # ── Internal ────────────────────────────────────────────────────
-
-    _health_checks: dict[str, Callable[[], Coroutine[Any, Any, bool]]] = {}
+    pass

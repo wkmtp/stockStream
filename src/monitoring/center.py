@@ -298,7 +298,9 @@ class MonitoringCenter:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )
-                stdout, _ = await proc.communicate()
+                stdout, _ = await asyncio.wait_for(
+                    proc.communicate(), timeout=5.0,
+                )
                 line = stdout.decode().strip()
                 parts = [p.strip() for p in line.split(",")]
                 if len(parts) >= 4:

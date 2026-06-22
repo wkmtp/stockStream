@@ -237,7 +237,9 @@ class VideoAssembler:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            _, stderr = await proc.communicate()
+            _, stderr = await asyncio.wait_for(
+                proc.communicate(), timeout=120.0,
+            )
             if proc.returncode != 0:
                 err_text = stderr.decode("utf-8", errors="replace")
                 logger.error("FFmpeg encoding failed (rc=%d): %s", proc.returncode, err_text[:500])

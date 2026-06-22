@@ -59,6 +59,7 @@ class FFmpegStreamer:
         self._watch_task: asyncio.Task[None] | None = None  # ← track orphan
         self._start_time: float = 0.0
         self._reconnect_attempts = 0
+        self._last_input_source: str = ""  # 24h 稳定性：记录输入源以支持自动重连
 
     # ── public API ─────────────────────────────────────────────────
 
@@ -92,6 +93,7 @@ class FFmpegStreamer:
         self._status.state = StreamState.STARTING
         self._status.last_error = ""
         self._reconnect_attempts = 0
+        self._last_input_source = input_source
 
         return await self._launch(input_source)
 
@@ -422,8 +424,14 @@ class FFmpegStreamer:
                 delay, self._reconnect_attempts, limit,
             )
             await asyncio.sleep(delay)
-            # The caller must provide the input source for reconnect
-            # We'll just mark state and let the service layer handle it
+            # 24h 稳定性：真正重新启动 FFmpeg，而非仅标记状态
+            input_src = self._last_input_source
+            if input_src:
+                logger.info("Auto-reconnecting FFmpeg with source: %s", input_src)
+                await self._launch(input_src)
+            else:
+                self._status.state = StreamState.ERROR
+                self._status.last_error = "No input source for auto-reconnect"
         else:
             self._status.state = StreamState.ERROR
             self._status.last_error = (

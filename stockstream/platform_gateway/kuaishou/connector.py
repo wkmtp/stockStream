@@ -315,7 +315,7 @@ class KuaishouConnector(BasePlatformConnector):
             except asyncio.CancelledError:
                 break
             except Exception:
-                logger.debug("Kuaishou heartbeat error", exc_info=True)
+                logger.warning("Kuaishou heartbeat error", exc_info=True)
 
     async def send_message(self, message: str) -> bool:
         """Send chat message to Kuaishou live room."""

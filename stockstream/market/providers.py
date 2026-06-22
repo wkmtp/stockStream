@@ -22,7 +22,9 @@ from stockstream.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-_TUSHARE_TOKEN = "1534c3dc1a6e6fe0b62b743132d867701831891e79bfb829ad70d090"
+import os as _os
+
+_TUSHARE_TOKEN = _os.getenv("TUSHARE_TOKEN", _os.getenv("STOCKSTREAM_TUSHARE_TOKEN", ""))
 
 
 def _to_ts_code(code: str, market: str) -> str:

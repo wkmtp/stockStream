@@ -223,10 +223,14 @@ class DirectorAgent:
 
         bus = await self.bus
 
+        # 24h 稳定性：记录所有订阅句柄，stop() 时取消
+        self._subs: list[tuple[str, object]] = []
+
         # 订阅行情
         @bus.on("market.price_updated")
         async def _on_price(event):
             await self._update_market_context(event)
+        self._subs.append(("market.price_updated", _on_price))
 
         # 订阅选股信号
         @bus.on("selector.signals_detected")
@@ -235,16 +239,19 @@ class DirectorAgent:
             sectors = data.get("sectors", [])
             if sectors:
                 self._context.hot_sectors = sectors[:5]
+        self._subs.append(("selector.signals_detected", _on_signals))
 
         # 订阅弹幕
         @bus.on("danmu.processed")
         async def _on_danmu(event):
             await self._update_danmu_context(event)
+        self._subs.append(("danmu.processed", _on_danmu))
 
         # 订阅礼物
         @bus.on("live.gift_action")
         async def _on_gift(event):
             await self._update_gift_context(event)
+        self._subs.append(("live.gift_action", _on_gift))
 
         # 订阅直播统计
         @bus.on("live.stats")
@@ -254,6 +261,7 @@ class DirectorAgent:
             self._context.like_rate = data.get("like_rate", 0.0)
             self._context.comment_rate = data.get("comment_rate", 0.0)
             self._context.new_followers = data.get("new_followers", 0)
+        self._subs.append(("live.stats", _on_stats))
 
         logger.info("DirectorAgent started — AI directing mode")
 
@@ -266,6 +274,13 @@ class DirectorAgent:
                 await self._task
             except asyncio.CancelledError:
                 pass
+
+        # 24h 稳定性：取消所有 EventBus 订阅
+        bus = await self.bus
+        for pattern, handler in getattr(self, '_subs', []):
+            bus.unsubscribe(pattern, handler)
+        self._subs = []
+
         logger.info("DirectorAgent stopped")
 
     # ── Decision Loop ───────────────────────────────────────────────

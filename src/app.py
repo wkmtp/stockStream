@@ -366,10 +366,17 @@ class Application:
         # 分析服务守护
         async def _restart_analysis() -> bool:
             try:
+                # 24h 稳定性：停止旧实例（含取消订阅）
                 await self.analysis.stop()
+                # 清理旧实例的 EventBus 订阅
+                if hasattr(self.analysis, '_subs'):
+                    bus = await get_event_bus()
+                    for pattern, handler in self.analysis._subs:
+                        bus.unsubscribe(pattern, handler)
                 await asyncio.sleep(2)
                 bus = await get_event_bus()
                 self.analysis = AnalysisService(bus=bus)
+                await self.analysis.start()
                 return True
             except Exception as e:
                 logger.error("Analysis restart failed: %s", e)
@@ -447,7 +454,10 @@ class Application:
     # ────────────────────────────────────────────────────────────────
 
     async def stop(self) -> None:
-        """Phase 4: 停止所有模块（反向顺序）。"""
+        """Phase 4: 停止所有模块（反向顺序，总超时 120 秒）。
+
+        24h 稳定性：每个模块最多等待 10 秒，总计不超过 120 秒。
+        """
         self._started = False
 
         stop_order = [
@@ -492,11 +502,21 @@ class Application:
             ("storage", self.storage),
         ]
 
-        for name, svc in stop_order:
-            await self._safe_stop(name, svc)
+        try:
+            await asyncio.wait_for(
+                self._stop_all(stop_order),
+                timeout=120.0,
+            )
+        except asyncio.TimeoutError:
+            logger.error("Application stop timed out after 120s — forcing exit")
 
         self.config.stop_watcher()
         logger.info("Application v2.0 stopped")
+
+    async def _stop_all(self, stop_order: list) -> None:
+        """逐个停止所有模块。"""
+        for name, svc in stop_order:
+            await self._safe_stop(name, svc)
 
     # ── Helpers ────────────────────────────────────────────────────
 
@@ -511,19 +531,32 @@ class Application:
                 logger.error("Failed to start %s: %s", name, exc)
 
     async def _safe_stop(self, name: str, svc: Any) -> None:
-        """安全停止模块：有 stop 方法才调用。"""
+        """安全停止模块：有 stop 方法才调用，每个模块最多等待 10 秒。
+
+        24h 稳定性：防止任一模块 stop() 卡死导致整个系统关不掉。
+        """
         if svc is None:
             return
         if hasattr(svc, "stop"):
             try:
-                await svc.stop()
+                await asyncio.wait_for(svc.stop(), timeout=10.0)
+            except asyncio.TimeoutError:
+                logger.error("Stop %s timed out after 10s", name)
             except Exception as exc:
                 logger.error("Failed to stop %s: %s", name, exc)
 
     async def _sched_market_collect(self) -> None:
-        """定时行情采集。"""
-        if self.market:
-            pass
+        """定时行情采集（24h 稳定性：真正触发行情采集）。"""
+        if self.market and self._started:
+            try:
+                snapshots = await self.market.collector.fetch_all()
+                if snapshots and self.storage:
+                    for s in snapshots[:20]:
+                        await self.storage.stocks.insert_price(
+                            s.symbol, s.price, s.volume,
+                        )
+            except Exception as exc:
+                logger.warning("Scheduled market collect error: %s", exc)
 
     def _register_monitors(self) -> None:
         """注册各模块健康检查。"""

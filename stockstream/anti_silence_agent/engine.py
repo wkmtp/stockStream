@@ -147,6 +147,9 @@ class AntiSilenceAgent:
             message=message,
         )
         self._action_history.append(action)
+        # 24h: 裁剪旧记录
+        if len(self._action_history) > self._action_history_max:
+            self._action_history = self._action_history[-100:]
         self._last_interaction_time = time.time()
 
         logger.info("AntiSilence: triggered %s (silence_count=%d)", action_type, self._silence_count)

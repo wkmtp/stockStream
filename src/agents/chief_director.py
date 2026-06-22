@@ -17,12 +17,17 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 
 from src.core.event_bus import EventBus, get_event_bus
 
 logger = logging.getLogger(__name__)
+
+# ── 24h 稳定性常量 ──
+_MAX_DECISIONS = 500            # _decisions 列表上限
+_INTERVENTION_QUEUE_SIZE = 200  # 干预队列上限
 
 
 class ContentPriority(Enum):
@@ -124,7 +129,7 @@ class ChiefDirector:
         self._running = False
         self._task: asyncio.Task | None = None
         self._decisions: list[DirectorDecision] = []
-        self._intervention_queue: asyncio.Queue[DirectorDecision] = asyncio.Queue()
+        self._intervention_queue: asyncio.Queue[DirectorDecision] = asyncio.Queue(maxsize=_INTERVENTION_QUEUE_SIZE)
 
     @property
     async def bus(self) -> EventBus:
@@ -140,18 +145,24 @@ class ChiefDirector:
         self._task = asyncio.create_task(self._run_loop())
         bus = await self.bus
 
+        # 24h 稳定性：记录所有订阅句柄，stop() 时取消
+        self._subs: list[tuple[str, Callable]] = []
+
         # 订阅关键事件
         @bus.on("danmu.processed", priority=100)
         async def _on_danmu(event):
             await self._evaluate_danmu(event)
+        self._subs.append(("danmu.processed", _on_danmu))
 
         @bus.on("live.gift_action", priority=100)
         async def _on_gift(event):
             await self._evaluate_gift(event)
+        self._subs.append(("live.gift_action", _on_gift))
 
         @bus.on("live.engagement_action", priority=90)
         async def _on_engagement(event):
             await self._evaluate_engagement(event)
+        self._subs.append(("live.engagement_action", _on_engagement))
 
         logger.info("ChiefDirector started — auto-pilot engaged")
         await bus.emit_async("director.show_started", {
@@ -167,7 +178,12 @@ class ChiefDirector:
             except asyncio.CancelledError:
                 pass
 
+        # 24h 稳定性：取消所有 EventBus 订阅
         bus = await self.bus
+        for pattern, handler in getattr(self, '_subs', []):
+            bus.unsubscribe(pattern, handler)
+        self._subs = []
+
         await bus.emit_async("director.show_ended", {})
         logger.info("ChiefDirector stopped")
 
@@ -245,6 +261,8 @@ class ChiefDirector:
             reason=f"Rundown #{self._current_index}",
         )
         self._decisions.append(decision)
+        if len(self._decisions) > _MAX_DECISIONS:
+            self._decisions = self._decisions[-_MAX_DECISIONS:]
 
     # ── Evaluation ─────────────────────────────────────────────────
 
@@ -258,6 +276,12 @@ class ChiefDirector:
                 priority=ContentPriority.HIGH,
                 reason=f"Stock question from {data.get('username', '')}",
             )
+            if self._intervention_queue.full():
+                # 24h 稳定性：队列满时丢弃旧条目，防止内存膨胀
+                try:
+                    self._intervention_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    pass
             await self._intervention_queue.put(decision)
 
     async def _evaluate_gift(self, event) -> None:
@@ -269,6 +293,12 @@ class ChiefDirector:
                 priority=ContentPriority.CRITICAL,
                 reason=f"Super gift from {data.get('user', '')}",
             )
+            # 24h: 队列满时丢弃旧条目
+            if self._intervention_queue.full():
+                try:
+                    self._intervention_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    pass
             await self._intervention_queue.put(decision)
 
     async def _evaluate_engagement(self, event) -> None:
@@ -280,6 +310,12 @@ class ChiefDirector:
                 priority=ContentPriority.HIGH,
                 reason=f"High engagement: {data.get('message', '')}",
             )
+            # 24h: 队列满时丢弃旧条目
+            if self._intervention_queue.full():
+                try:
+                    self._intervention_queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    pass
             await self._intervention_queue.put(decision)
 
     async def _operation_check(self) -> None:
@@ -295,6 +331,8 @@ class ChiefDirector:
             while True:
                 decision = self._intervention_queue.get_nowait()
                 self._decisions.append(decision)
+                if len(self._decisions) > _MAX_DECISIONS:
+                    self._decisions = self._decisions[-_MAX_DECISIONS:]
                 logger.info("Director intervention: %s (priority=%s)",
                            decision.next_action, decision.priority.value)
         except asyncio.QueueEmpty:

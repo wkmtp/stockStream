@@ -93,6 +93,7 @@ class MonetizationAgent:
         self.interval_seconds = interval_minutes * 60
         self._last_action_time: float = time.time()  # Don't trigger immediately
         self._action_history: list[MonetizeAction] = []
+        self._action_history_max: int = 200  # 24h: 防止无界增长
         self._total_actions = 0
         # Rotate through types
         self._type_index = 0
@@ -130,6 +131,9 @@ class MonetizationAgent:
         self._last_action_time = now
         self._total_actions += 1
         self._action_history.append(action)
+        # 24h: 裁剪旧记录，每30分钟触发一次，200条可容纳100小时
+        if len(self._action_history) > self._action_history_max:
+            self._action_history = self._action_history[-100:]
 
         logger.info("Monetization: %s triggered (total=%d)", mtype.value, self._total_actions)
         return action

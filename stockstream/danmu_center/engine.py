@@ -238,6 +238,12 @@ class DanmuCenter:
             raw=event.raw,
         )
 
+        # 24h: 队列满时丢弃旧消息，防止产生者阻塞
+        if self._output.full():
+            try:
+                self._output.get_nowait()
+            except asyncio.QueueEmpty:
+                pass
         await self._output.put(msg)
         return msg
 

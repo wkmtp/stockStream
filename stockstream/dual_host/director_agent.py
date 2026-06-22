@@ -42,6 +42,7 @@ class DirectorAgent:
         self._tick_task: asyncio.Task[None] | None = None
         self._on_segment: SegmentCallback | None = None
         self._segment_count: int = 0
+        self._fire_tasks: dict[str, asyncio.Task] = {}  # 24h: 追踪 fire-and-forget tasks
 
     def on_segment(self, callback: SegmentCallback) -> None:
         """Register callback invoked when a segment triggers."""
@@ -66,6 +67,15 @@ class DirectorAgent:
                 await self._tick_task
             except asyncio.CancelledError:
                 pass
+        # 24h: 取消所有 fire-and-forget tasks
+        for name, t in list(self._fire_tasks.items()):
+            if not t.done():
+                t.cancel()
+            try:
+                await t
+            except asyncio.CancelledError:
+                pass
+        self._fire_tasks.clear()
         logger.info("DirectorAgent stopped (segments=%d)", self._segment_count)
 
     # ── helpers ─────────────────────────────────────────────────
@@ -151,4 +161,6 @@ class DirectorAgent:
     def request_segment(self, segment_type: ShowSegmentType,
                         context: dict | None = None) -> None:
         """Manually request a segment (for audience Q&A triggers)."""
-        asyncio.create_task(self._fire_segment(segment_type))
+        # 24h: fire-and-forget task 加入追踪，防止异常被忽略
+        task = asyncio.create_task(self._fire_segment(segment_type))
+        self._fire_tasks[task.get_name()] = task

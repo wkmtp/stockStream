@@ -204,6 +204,9 @@ class ChiefDirectorAgent:
 
     async def start(self) -> None:
         """Start the director loop."""
+        # 24h: 幂等性保护
+        if self._running:
+            return
         self._running = True
         self._started_at = time.time()
         self._phase = DirectorPhase.WARMING_UP

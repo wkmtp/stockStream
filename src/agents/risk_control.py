@@ -210,18 +210,24 @@ class RiskControlCenter:
 
         bus = await self.bus
 
+        # 24h 稳定性：记录所有订阅句柄，stop() 时取消
+        self._subs: list[tuple[str, object]] = []
+
         # 监听所有文本输出事件
         @bus.on("tts.text_generated")
         async def _on_tts_text(event):
             await self._review_event_text(event)
+        self._subs.append(("tts.text_generated", _on_tts_text))
 
         @bus.on("director.segment_script")
         async def _on_script(event):
             await self._review_event_text(event)
+        self._subs.append(("director.segment_script", _on_script))
 
         @bus.on("analysis.qa_answer")
         async def _on_qa(event):
             await self._review_event_text(event)
+        self._subs.append(("analysis.qa_answer", _on_qa))
 
         logger.info("RiskControlCenter started")
 
@@ -234,6 +240,13 @@ class RiskControlCenter:
                 await self._task
             except asyncio.CancelledError:
                 pass
+
+        # 24h 稳定性：取消所有 EventBus 订阅
+        bus = await self.bus
+        for pattern, handler in getattr(self, '_subs', []):
+            bus.unsubscribe(pattern, handler)
+        self._subs = []
+
         logger.info("RiskControlCenter stopped")
 
     # ── Review ──────────────────────────────────────────────────────

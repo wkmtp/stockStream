@@ -23,7 +23,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Callable
 
 from src.core.event_bus import EventBus, get_event_bus
 
@@ -118,6 +118,7 @@ class NewsEngine:
         self._last_seen_cleanup = 0.0
         self._fetch_interval = 300  # 5分钟
         self._last_fetch = 0.0
+        self._on_action_cb: Callable | None = None  # 24h: 保存 EventBus 订阅回调引用
 
     @property
     async def bus(self) -> EventBus:
@@ -134,17 +135,24 @@ class NewsEngine:
 
         bus = await self.bus
 
-        @bus.on("director.action")
         async def _on_action(event):
             data = event.data or {}
             if data.get("action") == "news_brief":
                 await self._push_news_script()
+
+        bus.on("director.action")(_on_action)
+        self._on_action_cb = _on_action  # 24h: 保存引用以在 stop() 中取消订阅
 
         logger.info("NewsEngine started")
 
     async def stop(self) -> None:
         """停止新闻引擎。"""
         self._running = False
+        # 24h: 取消 EventBus 订阅，防止事件发送到已停止的模块
+        if self._on_action_cb:
+            bus = await self.bus
+            bus.unsubscribe("director.action", self._on_action_cb)
+            self._on_action_cb = None
         if self._task:
             self._task.cancel()
             try:

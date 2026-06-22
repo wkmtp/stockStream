@@ -91,6 +91,7 @@ class ClipGenerator:
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
         self._clip_history: list[ClipTask] = []
+        self._clip_history_max: int = 500  # 24h: 防止无界增长
         self._total_clips = 0
         self._last_clip_time: float = 0.0
         self._cooldown_seconds: float = 120.0     # min 2 min between auto-clips
@@ -203,6 +204,9 @@ class ClipGenerator:
             source_type=source,
         )
         self._clip_history.append(clip)
+        # 24h: 裁剪旧记录
+        if len(self._clip_history) > self._clip_history_max:
+            self._clip_history = self._clip_history[-250:]
         self._total_clips += 1
         logger.info("ClipGenerator: manual clip created (%s)", clip.clip_id)
         return clip

@@ -56,23 +56,32 @@ class MonitoringService:
         self._running = False
         if self._task:
             self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
         logger.info("MonitoringService stopped")
 
     async def _loop(self, interval: float) -> None:
         bus = await self.bus
-        while self._running:
-            for name, fn in self._modules.items():
-                try:
-                    healthy, msg = await fn() if asyncio.iscoroutinefunction(fn) else fn()
-                    if not healthy:
+        try:
+            while self._running:
+                for name, fn in self._modules.items():
+                    try:
+                        healthy, msg = await fn() if asyncio.iscoroutinefunction(fn) else fn()
+                        if not healthy:
+                            await bus.emit_async("monitoring.alert", {
+                                "module": name, "message": msg,
+                            })
+                    except asyncio.CancelledError:
+                        raise  # 24h: 重新抛出让外层 try 捕获
+                    except Exception as exc:
                         await bus.emit_async("monitoring.alert", {
-                            "module": name, "message": msg,
+                            "module": name, "message": str(exc),
                         })
-                except Exception as exc:
-                    await bus.emit_async("monitoring.alert", {
-                        "module": name, "message": str(exc),
-                    })
-            await asyncio.sleep(interval)
+                await asyncio.sleep(interval)
+        except asyncio.CancelledError:
+            logger.debug("MonitoringService loop cancelled")
 
     async def check_all(self) -> list[HealthCheck]:
         results = []

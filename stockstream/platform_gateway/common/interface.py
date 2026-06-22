@@ -39,6 +39,7 @@ class BasePlatformConnector(ABC):
         self._connected = False
         self._event_queue: asyncio.Queue[LiveEvent] = asyncio.Queue(maxsize=500)
         self._reconnect_count = 0
+        self._reconnect_task: asyncio.Task[None] | None = None  # 24h: 追踪重连任务
         self._last_event_time: float = 0.0
         self._total_comments = 0
         self._total_likes = 0
@@ -65,12 +66,19 @@ class BasePlatformConnector(ABC):
 
         # Start with reconnection loop
         self._running = True
-        asyncio.create_task(self._reconnect_loop())
+        self._reconnect_task = asyncio.create_task(self._reconnect_loop())  # 24h: 保存引用
         return False
 
     async def stop(self) -> None:
         """Disconnect and stop event collection."""
         self._running = False
+        # 24h: 取消重连任务
+        if self._reconnect_task and not self._reconnect_task.done():
+            self._reconnect_task.cancel()
+            try:
+                await self._reconnect_task
+            except asyncio.CancelledError:
+                pass
         try:
             await self._disconnect()
         except Exception:
@@ -365,6 +373,11 @@ class LivePlatformGateway:
 
         for task in tasks:
             task.cancel()
+            # 24h: 等待取消完成，防止 "Task was destroyed but it is pending" 错误
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
     def get_connector(self, platform: Platform) -> BasePlatformConnector | None:
         """Get a specific platform connector."""
