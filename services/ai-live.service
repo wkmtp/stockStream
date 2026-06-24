@@ -1,47 +1,42 @@
 [Unit]
-Description=AI Live Stock Stream - 全自动财经直播系统
-Documentation=https://github.com/stockstream/stockStream
-After=network-online.target docker.service
+Description=StockStream V3.0 AI 双数字人财经直播平台
+Documentation=https://github.com/stockstream/stockstream
+After=network.target network-online.target docker.service
 Wants=network-online.target
-Requires=docker.service
 
 [Service]
 Type=simple
 User=stockstream
 Group=stockstream
 WorkingDirectory=/opt/stockstream
-EnvironmentFile=/etc/stockstream/.env
-ExecStartPre=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml pull
-ExecStart=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml up
-ExecStop=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml down
-ExecReload=/usr/bin/docker compose -f /opt/stockstream/docker-compose.yml restart
-Restart=on-failure
-RestartSec=10s
+Environment=PYTHONUNBUFFERED=1
+Environment=STOCKSTREAM_JETSON_MODE=1
+Environment=OMP_NUM_THREADS=4
+Environment=MKL_NUM_THREADS=4
+ExecStart=/opt/stockstream/.venv/bin/python -m src.main --port 8080
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=always
+RestartSec=10
 StartLimitInterval=300
-StartLimitBurst=3
+StartLimitBurst=5
 
-# 资源限制（Jetson Xavier NX 8GB）
-MemoryHigh=6G
-MemoryMax=7G
-CPUQuota=500%
+# 资源限制
+MemoryMax=6G
+CPUQuota=300%
 TasksMax=512
 
 # 日志
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=ai-live
+SyslogIdentifier=stockstream
 
-# 安全加固
+# 安全增强
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=yes
-ReadWritePaths=/opt/stockstream/data /opt/stockstream/logs /opt/stockstream/cache
+ReadWritePaths=/opt/stockstream/data /opt/stockstream/logs /opt/stockstream/cache /opt/stockstream/backups
 ReadOnlyPaths=/opt/stockstream/config
-
-# cgroup 内存压力通知
-MemoryPressureWatch=on
-MemoryPressureThresholdSec=30s
 
 [Install]
 WantedBy=multi-user.target

@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from src.core.event_bus import EventBus, get_event_bus
 
@@ -56,7 +56,10 @@ class FanTracker:
 
     def __init__(self, bus: EventBus | None = None) -> None:
         self._bus: EventBus | None = bus
-        self._data: dict[str, list[FanSnapshot]] = defaultdict(list)
+        # V3.0: deque(maxlen=86400) — 24h @ 1 record/sec，防止 7x24 运行时无限增长
+        self._data: dict[str, deque[FanSnapshot]] = defaultdict(
+            lambda: deque(maxlen=86400)
+        )
         self._current: dict[str, FanSnapshot] = {}
 
     @property

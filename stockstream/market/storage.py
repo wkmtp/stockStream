@@ -84,6 +84,44 @@ class MarketSQLiteStorage:
         """No-op close; aiosqlite connections are short-lived per operation."""
         self._initialized = False
 
+    # ── V3.0: 数据库维护方法 ──────────────────────────────────────────
+
+    async def checkpoint_wal(self) -> None:
+        """V3.0: 执行 WAL checkpoint 防止 WAL 文件无限增长。"""
+        await self._ensure_initialized()
+        try:
+            async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+            logger.debug("MarketStorage WAL checkpoint completed")
+        except Exception as exc:
+            logger.warning("MarketStorage WAL checkpoint failed: %s", exc)
+
+    async def integrity_check(self) -> dict[str, str]:
+        """V3.0: 执行数据库完整性检查。"""
+        await self._ensure_initialized()
+        try:
+            async with aiosqlite.connect(self.db_path) as conn:
+                cursor = await conn.execute("PRAGMA integrity_check")
+                row = await cursor.fetchone()
+                result = row[0] if row else "unknown"
+                ok = result == "ok"
+                if not ok:
+                    logger.error("MarketStorage integrity check FAILED: %s", result)
+            return {"status": "healthy" if ok else "corrupt", "detail": result}
+        except Exception as exc:
+            logger.error("MarketStorage integrity check error: %s", exc)
+            return {"status": "error", "detail": str(exc)}
+
+    async def vacuum(self) -> None:
+        """V3.0: 回收数据库空间（VACUUM 重建数据库文件）。"""
+        await self._ensure_initialized()
+        try:
+            async with aiosqlite.connect(self.db_path) as conn:
+                await conn.execute("VACUUM")
+            logger.info("MarketStorage VACUUM completed")
+        except Exception as exc:
+            logger.warning("MarketStorage VACUUM failed: %s", exc)
+
     async def cleanup_old_data(self, keep_hours: int = 72) -> int:
         """Remove rows older than *keep_hours* to prevent unbounded growth.
 

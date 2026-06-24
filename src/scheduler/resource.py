@@ -321,7 +321,7 @@ class ResourceScheduler:
         return 0.0
 
     async def _read_gpu_metrics(self) -> dict[str, float]:
-        """读取 GPU 指标。"""
+        """V3.0: 读取 GPU 指标（Jetson sysfs + nvidia-smi 回退）。"""
         result: dict[str, float] = {}
 
         # Jetson GPU 负载
@@ -331,6 +331,25 @@ class ResourceScheduler:
                 with open(gpu_load) as f:
                     result["utilization"] = float(f.read().strip()) / 10.0
             except (OSError, ValueError):
+                pass
+
+        # V3.0: nvidia-smi 回退（通用 NVIDIA GPU）
+        if not result:
+            try:
+                import subprocess
+                res = subprocess.run(
+                    ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used,memory.total",
+                     "--format=csv,noheader,nounits"],
+                    capture_output=True, text=True, timeout=5,
+                )
+                if res.returncode == 0:
+                    parts = [p.strip() for p in res.stdout.strip().split(",")]
+                    if len(parts) >= 3:
+                        result["utilization"] = float(parts[0])
+                        result["mem_used_mb"] = float(parts[1])
+                        result["mem_total_mb"] = float(parts[2])
+                        result["mem_percent"] = (float(parts[1]) / max(float(parts[2]), 1)) * 100
+            except Exception:
                 pass
 
         return result

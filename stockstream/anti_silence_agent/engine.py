@@ -106,6 +106,7 @@ class AntiSilenceAgent:
         self._last_interaction_time: float = 0.0  # Start as "long silence" for testing
         self._silence_count = 0
         self._action_history: list[SilenceAction] = []
+        self._action_history_max: int = 200  # V3.0: fix missing attribute (was undefined)
         self._used_questions: list[int] = []
 
     def record_interaction(self) -> None:

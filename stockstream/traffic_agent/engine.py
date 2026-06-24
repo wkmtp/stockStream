@@ -84,6 +84,7 @@ class TrafficAgent:
         self._used_templates: list[int] = []
         self._total_ctas = 0
         self._action_history: list[TrafficAction] = []
+        self._action_history_max: int = 200  # V3.0: 防止无界增长
 
     def should_trigger(self) -> TrafficAction | None:
         """Check if it's time to send a traffic CTA."""
@@ -112,6 +113,9 @@ class TrafficAgent:
         self._last_cta_time = now
         self._total_ctas += 1
         self._action_history.append(action)
+        # V3.0: 防止无界增长，保留最近 100 条
+        if len(self._action_history) > self._action_history_max:
+            self._action_history = self._action_history[-100:]
         logger.debug("Traffic: %s triggered (total=%d)", action_type, self._total_ctas)
         return action
 

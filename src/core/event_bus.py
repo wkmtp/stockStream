@@ -114,6 +114,13 @@ class EventBus:
         - 性能度量
     """
 
+    # V3.0: 不可丢弃的关键事件前缀
+    _CRITICAL_PREFIXES: set[str] = {
+        "monitoring.alert", "system.module_failed", "system.module_recovered",
+        "stream.reconnect", "stream.status_changed", "system.stream_recovery_needed",
+        "resource.emergency", "stream.health",
+    }
+
     def __init__(self, max_history: int = 1000) -> None:
         self._subscribers: dict[str, list[_Subscriber]] = defaultdict(list)
         self._history: list[Event] = []
@@ -123,6 +130,9 @@ class EventBus:
         self._running = False
         self._pending_tasks: set[asyncio.Task] = set()
         self._max_pending_tasks = 200  # 24h 稳定性：限制并发 emit_async 任务数
+        # V3.0: 关键事件计数器
+        self._critical_events_emitted = 0
+        self._critical_events_dropped = 0
 
     # ── Subscribe ──────────────────────────────────────────────────
 
@@ -248,15 +258,40 @@ class EventBus:
         """异步发布事件（不等待订阅者处理完毕，fire-and-forget）。
 
         24h 稳定性：限制并发 fire-and-forget 任务数，防止 Task 泄漏。
+        V3.0: 关键事件（monitoring.alert 等）不可丢弃，始终入队。
         """
+        # 检查是否为关键事件
+        is_critical = any(event_type.startswith(prefix) for prefix in self._CRITICAL_PREFIXES)
+
         # 清理已完成的任务
         self._pending_tasks = {t for t in self._pending_tasks if not t.done()}
         if len(self._pending_tasks) >= self._max_pending_tasks:
-            logger.warning("EventBus: emit_async task limit reached (%d), dropping event %s",
-                          self._max_pending_tasks, event_type)
-            return
+            if is_critical:
+                # V3.0: 关键事件强制入队（使用最小等待循环）
+                logger.warning(
+                    "EventBus: queue full (%d), waiting for capacity for critical event %s",
+                    self._max_pending_tasks, event_type,
+                )
+                # 自旋等待直到有空间（最多 5 秒）
+                for _ in range(50):
+                    await asyncio.sleep(0.1)
+                    self._pending_tasks = {t for t in self._pending_tasks if not t.done()}
+                    if len(self._pending_tasks) < self._max_pending_tasks:
+                        break
+                else:
+                    self._critical_events_dropped += 1
+                    logger.critical("EventBus: critical event DROPPED after 5s wait: %s", event_type)
+                    return
+                self._critical_events_emitted += 1
+            else:
+                logger.warning("EventBus: emit_async task limit reached (%d), dropping event %s",
+                              self._max_pending_tasks, event_type)
+                return
+
         task = asyncio.create_task(self.emit(event_type, data, source, priority, correlation_id))
         self._pending_tasks.add(task)
+        if is_critical:
+            self._critical_events_emitted += 1
 
     # ── Query ──────────────────────────────────────────────────────
 
@@ -269,6 +304,9 @@ class EventBus:
             "errors": self._stats.errors,
             "history_size": len(self._history),
             "subscriber_count": sum(len(v) for v in self._subscribers.values()),
+            "pending_tasks": len(self._pending_tasks),
+            "critical_events_emitted": self._critical_events_emitted,
+            "critical_events_dropped": self._critical_events_dropped,
         }
 
     def get_history(self, event_type: str = "", limit: int = 50) -> list[Event]:

@@ -1,0 +1,17 @@
+# StockStream V3.0 — Grafana Datasource Provisioning
+# 自动配置 Prometheus 数据源
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    uid: stockstream-prometheus
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "15s"
+      httpMethod: POST
+      manageAlerts: true

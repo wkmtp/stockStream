@@ -130,7 +130,24 @@ class TTSService:
             sentences=sentences,
         )
         self._active_tasks[task_id] = task
-        await self._task_queue.put(task)
+
+        # V3.0: put_nowait + 背压控制，防止队列满时阻塞事件循环
+        try:
+            self._task_queue.put_nowait(task)
+        except asyncio.QueueFull:
+            # 队列满时丢弃最旧任务，避免事件循环阻塞
+            try:
+                old_task = self._task_queue.get_nowait()
+                if old_task.task_id in self._active_tasks:
+                    del self._active_tasks[old_task.task_id]
+                self._task_queue.task_done()
+            except asyncio.QueueEmpty:
+                pass
+            self._task_queue.put_nowait(task)
+            logger.warning(
+                "TTS task queue full (max=%d): dropped oldest task, new=%s",
+                self._task_queue.maxsize, task_id,
+            )
 
         logger.debug(
             "TTS task %s queued: %d sentences, %d chars",

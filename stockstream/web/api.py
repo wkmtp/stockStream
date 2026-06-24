@@ -2516,14 +2516,24 @@ async def live_events_ws(websocket: WebSocket) -> None:
     ping_task = asyncio.create_task(_ping_loop())
     try:
         async for event in gw.events():
-            try:
-                await websocket.send_json(event.to_dict() if hasattr(event, 'to_dict') else {"type": "unknown"})
-            except Exception:
+            data = event.to_dict() if hasattr(event, 'to_dict') else {"type": "unknown"}
+            # V3.0: 发送重试 (最多 3 次)，记录失败但不静默断开
+            sent = False
+            for attempt in range(3):
+                try:
+                    await asyncio.wait_for(websocket.send_json(data), timeout=2.0)
+                    sent = True
+                    break
+                except Exception:
+                    if attempt < 2:
+                        await asyncio.sleep(0.1 * (attempt + 1))
+            if not sent:
+                logger.warning("Live events WS: failed to send event after 3 retries, disconnecting")
                 break
     except asyncio.CancelledError:
         pass
     except Exception as exc:
-        logger.debug("Live events WS disconnected: %s", exc)
+        logger.warning("Live events WS disconnected: %s", exc)
     finally:
         ping_task.cancel()
         try:

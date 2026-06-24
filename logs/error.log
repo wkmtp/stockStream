@@ -1,3 +1,5 @@
-2026-06-22 06:47:39 [CRITICAL] src.scheduler.resource: ResourceScheduler: EMERGENCY memory release (90.6%)
-2026-06-22 10:52:22 [CRITICAL] src.scheduler.resource: ResourceScheduler: EMERGENCY memory release (93.9%)
-2026-06-22 10:52:54 [CRITICAL] src.scheduler.resource: ResourceScheduler: EMERGENCY memory release (95.0%)
+2026-06-24 10:09:32 [ERROR] stockstream.dual_host.service: Segment generation failed for ShowSegmentType.OPENING: 'DanmuService' object has no attribute 'send'
+2026-06-24 10:10:08 [ERROR] stockstream.dual_host.service: Segment generation failed for ShowSegmentType.OPENING: 'DanmuService' object has no attribute 'send'
+2026-06-24 10:11:56 [ERROR] stockstream.dual_host.service: Segment generation failed for ShowSegmentType.OPENING: 'DanmuService' object has no attribute 'send'
+2026-06-24 11:06:37 [ERROR] stockstream.dual_host.service: Segment generation failed for ShowSegmentType.OPENING: 'DanmuService' object has no attribute 'send'
+2026-06-24 11:09:01 [ERROR] stockstream.dual_host.service: Segment generation failed for ShowSegmentType.OPENING: 'DanmuService' object has no attribute 'send'

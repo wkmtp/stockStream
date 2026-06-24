@@ -121,8 +121,13 @@ class FanGrowthTracker:
 
     def __init__(self, history_size: int = 86400) -> None:   # 24h of 1-second snapshots max
         self._follower_count: dict[str, int] = {}                # platform -> count
-        self._new_follows: dict[str, list[str]] = defaultdict(list)
-        self._unfollows: dict[str, list[str]] = defaultdict(list)
+        # V3.0: 使用 deque(maxlen=5000) 防止 7x24 运行时无限增长
+        self._new_follows: dict[str, deque[str]] = defaultdict(
+            lambda: deque(maxlen=5000)
+        )
+        self._unfollows: dict[str, deque[str]] = defaultdict(
+            lambda: deque(maxlen=5000)
+        )
         self._peak_count: dict[str, int] = {}
         self._snapshots: dict[str, deque[FanSnapshot]] = defaultdict(
             lambda: deque(maxlen=3600)  # 1 hour at 1/sec

@@ -241,6 +241,146 @@ async def event_stats(request: Request) -> dict[str, Any]:
     return _app(request).bus.get_stats()
 
 
+# ── WebSocket: Interactions ────────────────────────────────────────────
+
+
+@router.websocket("/ws/interactions")
+async def ws_interactions(websocket: WebSocket) -> None:
+    """统一互动 WebSocket — 接收评论/点赞/礼物/关注事件。
+
+    事件格式: {"platform":"douyin","type":"comment","user":"张三","content":"贵州茅台怎么看"}
+
+    自动路由到 ChiefDirector → StockQA → DualHost 双主播回答。
+    """
+    await websocket.accept()
+    app: Application = websocket.app.state.application
+    bus = await get_event_bus()
+
+    ping_interval = 30.0
+    ping_failures = 0
+    ping_task: asyncio.Task | None = None
+
+    async def _ping():
+        nonlocal ping_failures
+        while True:
+            await asyncio.sleep(ping_interval)
+            try:
+                await asyncio.wait_for(websocket.send_json({"type": "pong"}), timeout=5.0)
+                ping_failures = 0
+            except Exception:
+                ping_failures += 1
+                if ping_failures >= 3:
+                    logger.debug("WS interactions: ping timeout, closing")
+                    break
+
+    ping_task = asyncio.create_task(_ping())
+
+    try:
+        while True:
+            raw = await websocket.receive_text()
+            ping_failures = 0
+            try:
+                data: dict[str, Any] = json.loads(raw)
+            except json.JSONDecodeError:
+                await websocket.send_json({"error": "Invalid JSON"})
+                continue
+
+            evt_type = data.get("type", "comment")
+            platform = data.get("platform", "douyin")
+            username = data.get("user", data.get("username", "匿名观众"))
+            content = data.get("content", data.get("text", ""))
+            gift_name = data.get("gift_name", "")
+            gift_count = data.get("count", 1)
+
+            # 通过 EventBus 分发到各处理模块
+            if evt_type == "comment" and content:
+                await bus.emit_async("danmu.comment", {
+                    "platform": platform, "username": username,
+                    "content": content, "timestamp": asyncio.get_event_loop().time(),
+                })
+                # 同时推送双主播互动队列
+                if app.chief_director:
+                    await bus.emit_async("director.audience_question", {
+                        "username": username, "question": content,
+                    })
+                await websocket.send_json({"status": "received", "type": "comment"})
+
+            elif evt_type == "like":
+                count = data.get("count", 1)
+                await bus.emit_async("live.like", {
+                    "platform": platform, "username": username, "count": count,
+                })
+                await websocket.send_json({"status": "received", "type": "like"})
+
+            elif evt_type == "gift":
+                await bus.emit_async("live.gift", {
+                    "platform": platform, "username": username,
+                    "gift_name": gift_name, "count": gift_count,
+                })
+                await websocket.send_json({"status": "received", "type": "gift"})
+
+            elif evt_type == "follow":
+                await bus.emit_async("live.follow", {
+                    "platform": platform, "username": username,
+                })
+                await websocket.send_json({"status": "received", "type": "follow"})
+
+            else:
+                await websocket.send_json({"status": "unknown_type", "type": evt_type})
+
+    except asyncio.CancelledError:
+        pass
+    except Exception as exc:
+        logger.debug("WS interactions disconnected: %s", exc)
+    finally:
+        if ping_task:
+            ping_task.cancel()
+            try:
+                await ping_task
+            except asyncio.CancelledError:
+                pass
+        try:
+            await websocket.close()
+        except Exception:
+            pass
+
+
+# ── Health Check ───────────────────────────────────────────────────────
+
+
+@router.get("/health", tags=["health"])
+async def health_check(request: Request) -> dict:
+    """V3.0: 全系统健康检查端点。
+
+    返回所有模块状态 (healthy/warning/critical)。
+    用于负载均衡探活和运维监控。
+    """
+    app: Application = request.app.state.application
+    # 优先使用 HealthCheckService
+    if app.health_check:
+        return await app.health_check.get_full_report().__dict__ if hasattr(
+            await app.health_check.get_full_report(), '__dict__'
+        ) else await app.health_check.get_quick_status()
+
+    # Fallback: 基础检查
+    modules = app._module_count()
+    return {
+        "status": "healthy" if modules > 10 else "degraded",
+        "uptime_seconds": 0,
+        "modules_loaded": modules,
+        "version": "3.0.0",
+    }
+
+
+@router.get("/health/quick", tags=["health"])
+async def health_check_quick(request: Request) -> dict:
+    """轻量健康检查 (负载均衡探活)。"""
+    app: Application = request.app.state.application
+    if app.health_check:
+        return await app.health_check.get_quick_status()
+    return {"status": "healthy", "modules": app._module_count()}
+
+
 # ── App Factory ───────────────────────────────────────────────────────
 
 
@@ -258,9 +398,28 @@ def create_app(application: Application) -> FastAPI:
 
     fastapi_app = FastAPI(
         title="StockStream v2.0",
-        description="企业级 AI 数字人财经直播系统",
+        description="企业级 AI 双数字人财经直播平台",
         version="2.0.0",
         lifespan=lifespan,
     )
+
+    # CORS
+    from fastapi.middleware.cors import CORSMiddleware
+    fastapi_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     fastapi_app.include_router(router)
+
+    # ── 挂载直播页面 ──
+    from stockstream.web.live_page import router as live_router
+    fastapi_app.include_router(live_router)
+
+    # ── 挂载监控页面 (V3.0) ──
+    from src.monitoring.web_monitor import router as monitor_router
+    fastapi_app.include_router(monitor_router)
+
     return fastapi_app

@@ -41,6 +41,12 @@ from stockstream.video.scene_manager import SceneManager, SceneType
 logger = logging.getLogger(__name__)
 
 
+def _pipe_write_sync(stdin: object, data: bytes) -> None:
+    """V3.0: 同步写入 FFmpeg stdin pipe，在线程池中执行。"""
+    stdin.write(data)  # type: ignore[union-attr]
+    stdin.flush()       # type: ignore[union-attr]
+
+
 @dataclass
 class CompositorConfig:
     """Live compositor configuration."""
@@ -267,8 +273,8 @@ class LiveCompositor:
                 if composited.shape[1] != self.cfg.width or composited.shape[0] != self.cfg.height:
                     composited = cv2.resize(composited, (self.cfg.width, self.cfg.height))
 
-                # Write to FFmpeg stdin pipe
-                self._write_frame(composited)
+                # Write to FFmpeg stdin pipe (V3.0: async, thread-pool backed)
+                await self._write_frame(composited)
 
                 self.state.frame_count += 1
 
@@ -298,7 +304,8 @@ class LiveCompositor:
                 except Exception:
                     logger.debug("LiveCompositor: cap.release() failed")
             self._kill_ffmpeg()
-            logger.info("LiveCompositor stopped (frames=%d)", self.state.frame_count)
+            logger.info("LiveCompositor stopped (frames=%d, fps=%.1f)",
+                        self.state.frame_count, self.state.fps_actual)
 
     # ── FFmpeg pipe management ─────────────────────────────────────
 
@@ -353,41 +360,80 @@ class LiveCompositor:
             logger.error("Failed to start FFmpeg pipe: %s", exc)
             return False
 
-    def _write_frame(self, frame: np.ndarray) -> None:
-        """Write a single BGR frame to FFmpeg stdin."""
+    async def _write_frame(self, frame: np.ndarray) -> None:
+        """Write a single BGR frame to FFmpeg stdin.
+
+        V3.0: 使用 loop.run_in_executor 将同步写入放到线程池执行，
+        防止 FFmpeg stdin 管道满时阻塞事件循环。300ms 超时保护。
+        """
         if self._process is None or self._process.stdin is None:
             return
+
+        data = frame.tobytes()
         try:
-            self._process.stdin.write(frame.tobytes())
+            loop = asyncio.get_running_loop()
+            await asyncio.wait_for(
+                loop.run_in_executor(None, _pipe_write_sync, self._process.stdin, data),
+                timeout=0.3,
+            )
         except (BrokenPipeError, OSError) as exc:
             logger.warning("FFmpeg pipe write failed: %s", exc)
-            # 24h: 写入失败时必须清理子进程，防止孤儿进程
+            self._kill_ffmpeg()
+        except (TimeoutError, asyncio.TimeoutError):
+            logger.warning("FFmpeg pipe write timeout (300ms), stdin may be full")
+        except Exception as exc:
+            logger.warning("FFmpeg pipe write error: %s", exc)
             self._kill_ffmpeg()
 
     def _kill_ffmpeg(self) -> None:
-        """Kill the FFmpeg subprocess."""
+        """Kill the FFmpeg subprocess (V3.0: 非阻塞，使用线程池等待)。"""
         if self._process is None:
             return
+        process = self._process
+        self._process = None  # 先置空防止重复调用
         try:
-            self._process.stdin.close()
+            process.stdin.close()
         except Exception:
             logger.debug("FFmpeg stdin close failed during kill")
         try:
-            self._process.terminate()
-            self._process.wait(timeout=3)
-        except subprocess.TimeoutExpired:
-            self._process.kill()
+            process.terminate()
         except Exception:
             pass
-        self._process = None
+        # V3.0: 在后台线程等待进程退出，不阻塞事件循环
+        import threading
+        def _wait_and_force_kill():
+            try:
+                process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                try:
+                    process.kill()
+                    process.wait(timeout=2)
+                except Exception:
+                    pass
+            except Exception:
+                pass
+        threading.Thread(target=_wait_and_force_kill, daemon=True, name="ffmpeg-cleanup").start()
 
     def _drain_stderr(self) -> None:
-        """Background thread: read and discard FFmpeg stderr to prevent pipe buffer deadlock."""
+        """V3.0: 后台线程读取 FFmpeg stderr，记录前三行错误用于调试。
+        循环在 FFmpeg 退出时自动终止（stdout/stderr 关闭）。
+        """
         if self._process is None or self._process.stderr is None:
             return
+        line_count = 0
+        max_log_lines = 3  # 只记录前3行错误，避免洪水
         try:
-            for _ in self._process.stderr:
-                pass
+            for line in self._process.stderr:
+                line_count += 1
+                if line_count <= max_log_lines:
+                    try:
+                        decoded = line.decode("utf-8", errors="replace").strip()
+                        if decoded:
+                            logger.warning("FFmpeg stderr: %s", decoded)
+                    except Exception:
+                        pass
+            if line_count > max_log_lines:
+                logger.debug("FFmpeg stderr: %d total lines drained", line_count)
         except Exception:
             logger.debug("FFmpeg stderr drain exception during compositor cleanup")
 

@@ -18,7 +18,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
+import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -69,6 +72,19 @@ class Application:
     video_writer: Any = None
     live_dashboard: Any = None
 
+    # ── 双主播 ──
+    dual_host: Any = None
+
+    # ── 可视化引擎 ──
+    chart_engine: Any = None
+    heatmap_engine: Any = None
+    subtitle_engine: Any = None
+    layout_engine: Any = None
+    dashboard_engine: Any = None
+    slide_generator: Any = None
+    scene_manager: Any = None
+    content_scene_matcher: Any = None
+
     # ── 辅助服务 ──
     dashboard: Any = None
     scheduler: Any = None
@@ -88,6 +104,9 @@ class Application:
 
     # ── State ──
     _started: bool = False
+    # V3.0: 全局任务跟踪器（30 天稳定性）
+    _all_tasks: set[asyncio.Task] = field(default_factory=set)
+    _maintenance_task: asyncio.Task | None = None
 
     # ────────────────────────────────────────────────────────────────
     # Phase 1: Initialize
@@ -224,6 +243,12 @@ class Application:
         from src.live.dashboard import LiveDashboard
         self.live_dashboard = LiveDashboard(bus=bus)
 
+        # ── 双主播系统 ──
+        await self._wire_dual_host()
+
+        # ── 可视化引擎 ──
+        await self._wire_visualization_engines()
+
         # ── 辅助服务 ──
         from src.dashboard.service import DashboardService
         self.dashboard = DashboardService(bus=bus)
@@ -302,6 +327,91 @@ class Application:
 
         # ── Recovery: 注册守护 ──
         await self._register_recovery_guards()
+
+        # ════════════════════════════════════════════════════════════
+        # V3.0 Production Infrastructure
+        # ════════════════════════════════════════════════════════════
+
+        # 数据库管理器 (WAL + 连接池)
+        try:
+            from src.core.db_manager import DatabaseManager, DBConfig
+            self.db_manager = DatabaseManager(DBConfig(
+                db_path=self.config.get("database.path", "data/stockstream.db"),
+                wal_mode=True,
+                pool_size=4,
+            ))
+            self.db_manager.initialize()
+            logger.info("DatabaseManager initialized")
+        except Exception as exc:
+            logger.warning("DatabaseManager not available: %s", exc)
+            self.db_manager = None
+
+        # 缓存服务
+        try:
+            from src.core.cache_service import CacheService
+            self.cache_service = CacheService(
+                cache_root=self.config.get("cache.root", "cache"),
+            )
+            logger.info("CacheService wired")
+        except Exception as exc:
+            logger.warning("CacheService not available: %s", exc)
+            self.cache_service = None
+
+        # 资源管理器
+        try:
+            from src.core.resource_manager import ResourceManager, ResourceConfig
+            self.resource_manager = ResourceManager(
+                bus=bus,
+                jetson_mode=bool(os.environ.get("STOCKSTREAM_JETSON_MODE")),
+            )
+            if self.cache_service:
+                self.resource_manager.set_callbacks(
+                    clean_cache=self.cache_service.clear_all,
+                )
+            logger.info("ResourceManager wired")
+        except Exception as exc:
+            logger.warning("ResourceManager not available: %s", exc)
+            self.resource_manager = None
+
+        # 推流看门狗
+        try:
+            from src.core.stream_guard import StreamGuard, StreamGuardConfig
+            self.stream_guard = StreamGuard(bus=bus)
+            logger.info("StreamGuard wired")
+        except Exception as exc:
+            logger.warning("StreamGuard not available: %s", exc)
+            self.stream_guard = None
+
+        # 健康检查服务
+        try:
+            from src.core.health_check import HealthCheckService
+            self.health_check = HealthCheckService(bus=bus)
+            logger.info("HealthCheckService wired")
+        except Exception as exc:
+            logger.warning("HealthCheckService not available: %s", exc)
+            self.health_check = None
+
+        # 备份服务
+        try:
+            from src.core.backup_service import BackupService, BackupConfig
+            self.backup_service = BackupService(BackupConfig(
+                backup_dir=self.config.get("backup.dir", "backups"),
+                retention_days=self.config.get("backup.retention_days", 30),
+                schedule_hour=self.config.get("backup.schedule_hour", 3),
+            ))
+            logger.info("BackupService wired")
+        except Exception as exc:
+            logger.warning("BackupService not available: %s", exc)
+            self.backup_service = None
+
+        # 更新管理器
+        try:
+            from src.core.update_manager import UpdateManager, UpdateConfig
+            self.update_manager = UpdateManager()
+            logger.info("UpdateManager wired")
+        except Exception as exc:
+            logger.warning("UpdateManager not available: %s", exc)
+            self.update_manager = None
 
         logger.info("All services wired (%d modules)", self._module_count())
         return self
@@ -385,6 +495,124 @@ class Application:
         self.recovery.register("analysis", _restart_analysis, max_retries=5)
 
     # ────────────────────────────────────────────────────────────────
+    # Phase 2.5: Wire Dual-Host & Visualization Engines
+    # ────────────────────────────────────────────────────────────────
+
+    async def _wire_dual_host(self) -> None:
+        """接入双主播对话系统 (stockstream/dual_host)。"""
+        try:
+            from stockstream.dual_host.service import DualHostService
+            from stockstream.dual_host.models import DualHostConfig
+
+            cfg = DualHostConfig(
+                male_voice=self.config.get("tts.voice_male", "zh_CN-chaowen-medium"),
+                female_voice=self.config.get("tts.voice_female", "zh_CN-huayan-medium"),
+                male_model_path=self.config.get("tts.model_path_male", "models/zh_CN-chaowen-medium.onnx"),
+                female_model_path=self.config.get("tts.model_path_female", "models/zh_CN-huayan-medium.onnx"),
+                enable_debate=self.config.get("dual_host.enable_debate", True),
+                enable_humor=self.config.get("dual_host.enable_humor", True),
+                enable_storytelling=self.config.get("dual_host.enable_storytelling", True),
+                enable_audience=self.config.get("dual_host.enable_audience", True),
+                enable_news=self.config.get("dual_host.enable_news", True),
+            )
+            self.dual_host = DualHostService(
+                analysis=self.analysis,
+                tts=self.tts,
+                danmu=self.danmu,
+                config=cfg,
+            )
+            logger.info("DualHostService wired")
+        except Exception as exc:
+            logger.warning("DualHostService not available: %s", exc)
+            self.dual_host = None
+
+    async def _wire_visualization_engines(self) -> None:
+        """接入可视化引擎模块 (图表/热力图/字幕/布局/场景管理)。"""
+        bus = await get_event_bus()
+
+        # 图表引擎
+        try:
+            from stockstream.chart_engine.engine import ChartEngine
+            self.chart_engine = ChartEngine(
+                storage=self.storage,
+                cache_dir="cache/charts",
+                refresh_seconds=5,
+                default_width=880,
+                default_height=700,
+            )
+            logger.info("ChartEngine wired")
+        except Exception as exc:
+            logger.warning("ChartEngine not available: %s", exc)
+            self.chart_engine = None
+
+        # 热力图引擎
+        try:
+            from stockstream.heatmap_engine.engine import HeatmapEngine
+            self.heatmap_engine = HeatmapEngine(cache_dir="cache/heatmap")
+            logger.info("HeatmapEngine wired")
+        except Exception as exc:
+            logger.warning("HeatmapEngine not available: %s", exc)
+            self.heatmap_engine = None
+
+        # 字幕引擎
+        try:
+            from stockstream.subtitle_engine.engine import SubtitleEngine
+            self.subtitle_engine = SubtitleEngine(cache_dir="cache/subtitle")
+            logger.info("SubtitleEngine wired")
+        except Exception as exc:
+            logger.warning("SubtitleEngine not available: %s", exc)
+            self.subtitle_engine = None
+
+        # 布局引擎
+        try:
+            from stockstream.layout_engine.engine import LayoutEngine
+            self.layout_engine = LayoutEngine(preset="live")
+            logger.info("LayoutEngine wired")
+        except Exception as exc:
+            logger.warning("LayoutEngine not available: %s", exc)
+            self.layout_engine = None
+
+        # Dashboard渲染器
+        try:
+            from stockstream.dashboard_renderer.engine import DashboardEngine
+            self.dashboard_engine = DashboardEngine()
+            logger.info("DashboardEngine wired")
+        except Exception as exc:
+            logger.warning("DashboardEngine not available: %s", exc)
+            self.dashboard_engine = None
+
+        # AI幻灯片生成器
+        try:
+            from stockstream.ai_slide_generator.generator import SlideGenerator
+            self.slide_generator = SlideGenerator()
+            logger.info("SlideGenerator wired")
+        except Exception as exc:
+            logger.warning("SlideGenerator not available: %s", exc)
+            self.slide_generator = None
+
+        # 场景管理器
+        try:
+            from stockstream.video.scene_manager import SceneManager
+            self.scene_manager = SceneManager()
+            logger.info("SceneManager wired")
+        except Exception as exc:
+            logger.warning("SceneManager not available: %s", exc)
+            self.scene_manager = None
+
+        # 内容场景匹配器 (需要 SceneManager)
+        try:
+            from stockstream.content_scene_matcher.matcher import ContentSceneMatcher
+            if self.scene_manager:
+                self.content_scene_matcher = ContentSceneMatcher(
+                    scene_manager=self.scene_manager)
+            else:
+                self.content_scene_matcher = ContentSceneMatcher()
+            logger.info("ContentSceneMatcher wired")
+        except Exception as exc:
+            logger.warning("ContentSceneMatcher not available: %s", exc)
+            self.content_scene_matcher = None
+
+    # ────────────────────────────────────────────────────────────────
     # Phase 3: Start
     # ────────────────────────────────────────────────────────────────
 
@@ -395,6 +623,13 @@ class Application:
 
         # 基础设施
         await self._safe_start("recovery", self.recovery)
+
+        # V3.0 基础设施
+        await self._safe_start("resource_manager", self.resource_manager)
+        await self._safe_start("stream_guard", self.stream_guard)
+        await self._safe_start("health_check", self.health_check)
+        await self._safe_start("cache_service", self.cache_service)
+        await self._safe_start("backup_service", self.backup_service)
 
         # 数字人
         if hasattr(self.avatar, "initialize"):
@@ -424,6 +659,15 @@ class Application:
         await self._safe_start("video_writer", self.video_writer)
         await self._safe_start("live_dashboard", self.live_dashboard)
 
+        # 双主播系统
+        await self._safe_start("dual_host", self.dual_host)
+
+        # 可视化引擎
+        await self._safe_start("chart_engine", self.chart_engine)
+        await self._safe_start("heatmap_engine", self.heatmap_engine)
+        await self._safe_start("subtitle_engine", self.subtitle_engine)
+        await self._safe_start("dashboard_engine", self.dashboard_engine)
+
         # 辅助服务
         await self._safe_start("dashboard", self.dashboard)
         await self._safe_start("resource_scheduler", self.resource_scheduler)
@@ -446,8 +690,106 @@ class Application:
         await self._safe_start("monitoring_center", self.monitoring_center)
 
         self._started = True
+        # V3.0: 启动 30 天稳定性维护循环
+        self._maintenance_task = asyncio.create_task(self._maintenance_loop())
         logger.info("Application v2.0 started — %d modules running", self._module_count())
         return self
+
+    # ────────────────────────────────────────────────────────────────
+    # V3.0: 30 天稳定性维护循环
+    # ────────────────────────────────────────────────────────────────
+
+    async def _maintenance_loop(self) -> None:
+        """V3.0: 全局维护循环，保障 30 天连续运行。
+        每小时执行：
+          - 定期 GC 回收
+          - WAL checkpoint（防止文件无限增长）
+          - 数据库完整性检查
+          - 任务健康检查
+          - 日志清理
+        凌晨 3 点执行：
+          - 完整 VACUUM
+        """
+        maintenance_interval = int(self.config.get("maintenance.check_interval", 3600))
+        last_vacuum_day = -1
+        last_integrity_check = 0.0
+
+        while self._started:
+            try:
+                await asyncio.sleep(maintenance_interval)
+
+                # 1. 定期 GC
+                import gc as gc_module
+                gc_module.collect()
+                logger.debug("Maintenance: GC collected")
+
+                # 2. WAL checkpoint
+                if self.db_manager:
+                    await self.db_manager.checkpoint_wal()
+                # market/storage 有其独立的 checkpoint 方法
+                if self.market and hasattr(self.market, 'storage'):
+                    storage = self.market.storage
+                    if storage and hasattr(storage, 'checkpoint_wal'):
+                        await storage.checkpoint_wal()
+
+                # 3. 任务健康监控（每小时）
+                await self._check_all_tasks()
+
+                # 4. 日志清理
+                if self.log_center and hasattr(self.log_center, 'clean_old_logs'):
+                    removed = self.log_center.clean_old_logs()
+                    if removed:
+                        logger.info("Maintenance: cleaned %d old log files", removed)
+
+                # 5. 缓存清理
+                if self.cache_service and hasattr(self.cache_service, 'clear_expired'):
+                    await self.cache_service.clear_expired()
+
+                # 6. 数据库完整性检查（每 6 小时）
+                now_ts = time.time()
+                if now_ts - last_integrity_check > 21600:  # 6 hours
+                    if self.db_manager:
+                        result = await self.db_manager.integrity_check()
+                        if result["status"] != "healthy":
+                            logger.critical("Maintenance: DB integrity FAILED: %s", result)
+                    last_integrity_check = now_ts
+
+                # 7. 夜间 VACUUM（凌晨 3:00-4:00 执行）
+                now = datetime.now()
+                if now.hour == 3 and now.day != last_vacuum_day:
+                    if self.db_manager:
+                        await self.db_manager.vacuum()
+                    if self.market and hasattr(self.market, 'storage'):
+                        storage = self.market.storage
+                        if storage and hasattr(storage, 'vacuum'):
+                            await storage.vacuum()
+                    last_vacuum_day = now.day
+                    logger.info("Maintenance: nightly VACUUM completed")
+
+            except asyncio.CancelledError:
+                break
+            except Exception as exc:
+                logger.error("Maintenance loop error: %s", exc, exc_info=True)
+                await asyncio.sleep(60)  # 出错后等 1 分钟再继续
+
+    async def _check_all_tasks(self) -> None:
+        """V3.0: 检查所有全局任务是否仍在运行。"""
+        # 清理已完成的任务
+        self._all_tasks = {t for t in self._all_tasks if not t.done()}
+        crashed = 0
+        for task in list(self._all_tasks):
+            if task.done():
+                try:
+                    exc = task.exception()
+                    if exc is not None:
+                        crashed += 1
+                        logger.warning("Maintenance: task crashed: %s", exc)
+                except asyncio.InvalidStateError:
+                    pass
+                self._all_tasks.discard(task)
+        if crashed:
+            logger.warning("Maintenance: %d tasks crashed, %d still running",
+                          crashed, len(self._all_tasks))
 
     # ────────────────────────────────────────────────────────────────
     # Phase 4: Stop
@@ -459,6 +801,14 @@ class Application:
         24h 稳定性：每个模块最多等待 10 秒，总计不超过 120 秒。
         """
         self._started = False
+
+        # V3.0: 先停止维护循环
+        if self._maintenance_task and not self._maintenance_task.done():
+            self._maintenance_task.cancel()
+            try:
+                await self._maintenance_task
+            except asyncio.CancelledError:
+                pass
 
         stop_order = [
             # 监控先停
@@ -475,6 +825,13 @@ class Application:
             ("content_scheduler", self.content_scheduler),
             ("resource_scheduler", self.resource_scheduler),
             ("scheduler", self.scheduler),
+            # 可视化引擎
+            ("dashboard_engine", self.dashboard_engine),
+            ("subtitle_engine", self.subtitle_engine),
+            ("heatmap_engine", self.heatmap_engine),
+            ("chart_engine", self.chart_engine),
+            # 双主播
+            ("dual_host", self.dual_host),
             # 直播运营
             ("live_dashboard", self.live_dashboard),
             ("video_writer", self.video_writer),
@@ -500,6 +857,14 @@ class Application:
             ("dashboard", self.dashboard),
             ("recovery", self.recovery),
             ("storage", self.storage),
+            # V3.0 基础设施 (最后停止)
+            ("update_manager", self.update_manager),
+            ("backup_service", self.backup_service),
+            ("cache_service", self.cache_service),
+            ("health_check", self.health_check),
+            ("stream_guard", self.stream_guard),
+            ("resource_manager", self.resource_manager),
+            ("db_manager", self.db_manager),
         ]
 
         try:
@@ -529,6 +894,13 @@ class Application:
                 await svc.start()
             except Exception as exc:
                 logger.error("Failed to start %s: %s", name, exc)
+        # V3.0: 跟踪模块内部的 asyncio task
+        if hasattr(svc, '_task') and isinstance(svc._task, asyncio.Task):
+            self._all_tasks.add(svc._task)
+        if hasattr(svc, '_monitor_task') and isinstance(svc._monitor_task, asyncio.Task):
+            self._all_tasks.add(svc._monitor_task)
+        if hasattr(svc, '_watch_task') and isinstance(svc._watch_task, asyncio.Task):
+            self._all_tasks.add(svc._watch_task)
 
     async def _safe_stop(self, name: str, svc: Any) -> None:
         """安全停止模块：有 stop 方法才调用，每个模块最多等待 10 秒。
@@ -586,13 +958,25 @@ class Application:
         names = [
             "log_center", "recovery",
             "market", "tts", "analysis", "danmu", "avatar", "selector", "trading",
+            # 双主播
+            "dual_host",
+            # 可视化
+            "chart_engine", "heatmap_engine", "subtitle_engine",
+            "layout_engine", "dashboard_engine", "slide_generator",
+            "scene_manager", "content_scene_matcher",
+            # 直播运营
             "platform_gateway", "danmu_center", "engagement", "gift", "fan_tracker",
             "operation", "traffic", "anti_silence", "monetization",
             "clip_gen", "clip_factory", "video_writer", "live_dashboard",
+            # 辅助
             "dashboard", "scheduler", "monitor", "monitoring_center",
             "resource_scheduler", "content_scheduler",
+            # Agents
             "chief_director", "director_agent", "stock_qa",
             "knowledge_base", "market_review", "news_engine", "risk_control",
+            # V3.0 Infrastructure
+            "db_manager", "cache_service", "resource_manager",
+            "stream_guard", "health_check", "backup_service", "update_manager",
         ]
         return sum(1 for n in names if getattr(self, n, None) is not None)
 

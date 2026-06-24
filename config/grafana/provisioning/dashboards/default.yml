@@ -1,0 +1,11 @@
+# StockStream V3.0 — Grafana Dashboard Provisioning
+# 自动加载预置仪表盘
+
+apiVersion: 1
+
+providers:
+  - name: StockStream
+    folder: StockStream
+    type: file
+    options:
+      path: /etc/grafana/dashboards

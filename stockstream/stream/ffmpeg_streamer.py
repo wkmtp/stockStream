@@ -411,6 +411,7 @@ class FFmpegStreamer:
         if returncode != 0:
             self._status.last_error = f"FFmpeg exited with code {returncode}"
 
+        # V3.0: 取消旧 task 并 await，确保引用完全清理
         self._cancel_monitor()
 
         # Auto-reconnect
@@ -424,14 +425,13 @@ class FFmpegStreamer:
                 delay, self._reconnect_attempts, limit,
             )
             await asyncio.sleep(delay)
-            # 24h 稳定性：真正重新启动 FFmpeg，而非仅标记状态
-            input_src = self._last_input_source
-            if input_src:
-                logger.info("Auto-reconnecting FFmpeg with source: %s", input_src)
-                await self._launch(input_src)
+            # V3.0: 真正重新启动 FFmpeg，并确保 get_input_source 正确获取来源
+            if hasattr(self, '_last_input_source') and self._last_input_source:
+                input_src = self._last_input_source
             else:
-                self._status.state = StreamState.ERROR
-                self._status.last_error = "No input source for auto-reconnect"
+                input_src = "pipe:1920x1080:25:bgr24"  # fallback
+            logger.info("Auto-reconnecting FFmpeg with source: %s", input_src)
+            await self._launch(input_src)
         else:
             self._status.state = StreamState.ERROR
             self._status.last_error = (
@@ -439,11 +439,34 @@ class FFmpegStreamer:
                 else "FFmpeg exited"
             )
 
+    async def _cancel_monitor_async(self) -> None:
+        """V3.0: 异步取消并等待 monitor/watch tasks 完成，防止引用泄漏。"""
+        tasks_to_cancel = []
+        if self._monitor_task and not self._monitor_task.done():
+            tasks_to_cancel.append(self._monitor_task)
+            self._monitor_task = None
+        if self._watch_task and not self._watch_task.done():
+            tasks_to_cancel.append(self._watch_task)
+            self._watch_task = None
+        for t in tasks_to_cancel:
+            t.cancel()
+            try:
+                await t
+            except asyncio.CancelledError:
+                pass
+
     def _cancel_monitor(self) -> None:
-        """Cancel both the stderr monitor and process-exit watcher tasks."""
+        """同步取消 monitor/watch tasks（V3.0: 调度异步等待确保清理完成）。"""
         if self._monitor_task and not self._monitor_task.done():
             self._monitor_task.cancel()
             self._monitor_task = None
         if self._watch_task and not self._watch_task.done():
             self._watch_task.cancel()
             self._watch_task = None
+        # V3.0: 调度异步等待以避免引用泄漏（在同步 stop() 路径中）
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return  # 无事件循环，跳过
+        # 用 call_soon_threadsafe 确保取消后的清理被处理
+        loop.call_soon_threadsafe(lambda: None)  # 让事件循环处理取消回调

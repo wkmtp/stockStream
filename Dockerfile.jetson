@@ -1,60 +1,127 @@
-# StockStream v2.0 — Dockerfile for Jetson Xavier NX (ARM64 + GPU)
-# 构建: docker build -f Dockerfile.jetson -t stockstream:jetson .
+# StockStream V3.0 — Dockerfile for Jetson Xavier NX / AGX Orin (ARM64 + GPU)
+#
+# 构建:  docker build -f Dockerfile.jetson -t stockstream:jetson-latest .
+# 运行:  docker compose -f docker-compose.jetson.yml up -d
+#
+# 适配备注:
+#   - JetPack 5.1.x (L4T R35.4.1) → 使用 onnxruntime-gpu 1.16.3
+#   - JetPack 6.x (L4T R36.x)   → 修改 onnxruntime-gpu 版本为 1.18+
+#   - Wav2Lip ONNX 推理使用 CUDA/TensorRT EP，自动选择
 
+# ================================================================
+# Stage 1: Base — Jetson L4T + 系统依赖
+# ================================================================
 FROM nvcr.io/nvidia/l4t-base:r35.4.1 AS base
+
+LABEL maintainer="StockStream Team <stockstream@example.com>"
+LABEL version="3.0.0"
+LABEL description="AI-powered financial dual-avatar live streaming — Jetson Xavier NX Production Ready"
+LABEL target.hardware="NVIDIA Jetson Xavier NX / AGX Orin"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV TZ=Asia/Shanghai
 
-# 系统依赖
+# ── 系统依赖 ──
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.10 \
-    python3.10-dev \
-    python3-pip \
-    curl \
-    wget \
-    ca-certificates \
+    python3.10 python3.10-dev python3-pip \
+    curl wget ca-certificates tzdata \
     ffmpeg \
-    libsndfile1 \
-    libportaudio2 \
+    libsndfile1 libportaudio2 \
     libsqlite3-0 \
-    build-essential \
-    cmake \
-    git \
+    fonts-noto-cjk-extra fonts-liberation \
+    build-essential cmake git \
+    # Jetson 工具
+    nvidia-l4t-core \
+    nvidia-l4t-cuda \
+    nvidia-l4t-cudnn8 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 设置 python 别名
+# ── Python 别名 ──
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
+    pip install --upgrade pip setuptools wheel
 
-# 创建用户
-RUN useradd --create-home --shell /bin/bash stockstream && \
-    mkdir -p /app /data /app/logs /app/cache /app/models && \
+# ── 非 root 用户 ──
+RUN groupadd --system stockstream && \
+    useradd --system --create-home --shell /bin/bash -g stockstream stockstream && \
+    mkdir -p /app /data /app/logs /app/cache /app/backups /app/models && \
     chown -R stockstream:stockstream /app /data
 
 WORKDIR /app
 
-# ── Dependencies ──────────────────────────────────────────────────────
+# ================================================================
+# Stage 2: Dependencies — Python 包安装 (含 GPU 推理)
+# ================================================================
+FROM base AS dependencies
+
 COPY requirements.txt .
+
+# 安装通用依赖 + Jetson 专用 onnxruntime-gpu
 RUN pip install --upgrade pip setuptools wheel && \
     pip install -r requirements.txt && \
+    # onnxruntime-gpu 1.16.3 = 兼容 JetPack 5.1.x (CUDA 11.4)
     pip install onnxruntime-gpu==1.16.3
 
-# ── Application ───────────────────────────────────────────────────────
-FROM base AS jetson
+# ================================================================
+# Stage 3: Jetson (production target)
+# ================================================================
+FROM dependencies AS jetson
 
-COPY --chown=stockstream:stockstream src/ ./src/
-COPY --chown=stockstream:stockstream config/ ./config/
+# ── 复制应用代码 ──
+COPY --chown=stockstream:stockstream src/         ./src/
 COPY --chown=stockstream:stockstream stockstream/ ./stockstream/
-COPY --chown=stockstream:stockstream src/main.py ./main.py
+COPY --chown=stockstream:stockstream config/      ./config/
+COPY --chown=stockstream:stockstream scripts/     ./scripts/
+COPY --chown=stockstream:stockstream src/main.py  ./main.py
+COPY --chown=stockstream:stockstream VERSION      ./VERSION
+
+# ── 创建运行时目录 ──
+RUN mkdir -p /app/logs /app/data /app/cache /app/backups && \
+    chown -R stockstream:stockstream /app/logs /app/data /app/cache /app/backups
+
+# ── Jetson 优化环境变量 ──
+ENV STOCKSTREAM_JETSON_MODE=1 \
+    NVIDIA_VISIBLE_DEVICES=all \
+    OMP_NUM_THREADS=4 \
+    MKL_NUM_THREADS=4 \
+    ORT_TENSORRT_FP16_ENABLE=1 \
+    ORT_TENSORRT_ENGINE_CACHE_ENABLE=1 \
+    STOCKSTREAM_ENV=production
 
 USER stockstream
 
+# ── 健康检查 (V3.0: /health 端点) ──
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v2/health || exit 1
+    CMD curl -fsS http://localhost:8080/health || exit 1
 
-EXPOSE 8000 9090
-CMD ["python", "-u", "main.py"]
+# ── GPU 就绪检查: 确保容器内 ONNX 能检测到 CUDA Provider ──
+HEALTHCHECK --interval=60s --timeout=15s --start-period=90s --retries=2 \
+    CMD python -c "import onnxruntime as ort; assert 'CUDAExecutionProvider' in ort.get_available_providers()" || exit 1
+
+EXPOSE 8080 9090
+
+# ── 启动 (Jetson 模式) ──
+CMD ["python", "-u", "main.py", "--jetson"]
+
+
+# ================================================================
+# Stage 4: Jetson-Dev — 本地调试
+# ================================================================
+FROM jetson AS jetson-dev
+
+USER root
+RUN pip install debugpy pytest pytest-asyncio pytest-cov
+
+ENV STOCKSTREAM_ENV=development
+ENV STOCKSTREAM_LOG_LEVEL=debug
+
+USER stockstream
+
+CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", \
+     "-m", "uvicorn", "src.web:create_app_factory", \
+     "--host", "0.0.0.0", "--port", "8080", "--reload"]
