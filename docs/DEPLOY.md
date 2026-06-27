@@ -180,8 +180,7 @@ mkdir -p data logs cache backups docs monitoring
 # 下载模型
 python scripts/download_models.py
 
-# 初始化数据库
-python scripts/init_db.py
+# 数据库由 storage/service.py 自动初始化 (首次启动时创建)
 ```
 
 ### 3. 启动

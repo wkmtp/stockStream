@@ -63,15 +63,18 @@ fi
 # ── 4. 模型文件检查 ──
 echo "[init] Checking model files..."
 MODELS_FOUND=0
-for model_dir in "${APP_DIR}/models/"*; do
-    if [[ -d "${model_dir}" ]]; then
+for model_file in "${APP_DIR}/models"/*.onnx; do
+    if [[ -f "${model_file}" ]]; then
         MODELS_FOUND=$((MODELS_FOUND + 1))
-        echo "  Found: ${model_dir}"
+        model_name=$(basename "${model_file}")
+        model_size=$(du -h "${model_file}" 2>/dev/null | cut -f1 || echo "?")
+        echo "  Found: ${model_name} (${model_size})"
     fi
 done
 if [[ ${MODELS_FOUND} -eq 0 ]]; then
-    echo "  [WARN] No model directories found. TTS/Avatar may not work."
-    echo "  Expected: models/piper-tts/, models/wav2lip-onnx/"
+    echo "  [WARN] No ONNX model files found in ${APP_DIR}/models/"
+    echo "  Expected: zh_CN-huayan-medium.onnx, zh_CN-chaowen-medium.onnx, face_detector.onnx"
+    echo "  Run: python scripts/download_models.py --tts --face"
 fi
 
 # ── 5. 数据库初始化 (SQLite WAL 模式) ──

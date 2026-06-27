@@ -95,13 +95,11 @@ ENV STOCKSTREAM_JETSON_MODE=1 \
 
 USER stockstream
 
-# ── 健康检查 (V3.0: /health 端点) ──
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -fsS http://localhost:8080/health || exit 1
-
-# ── GPU 就绪检查: 确保容器内 ONNX 能检测到 CUDA Provider ──
-HEALTHCHECK --interval=60s --timeout=15s --start-period=90s --retries=2 \
-    CMD python -c "import onnxruntime as ort; assert 'CUDAExecutionProvider' in ort.get_available_providers()" || exit 1
+# ── 健康检查 (V3.0: HTTP /health + GPU CUDA 双重验证) ──
+# Docker 每个 stage 只保留最后一个 HEALTHCHECK，因此必须合并为一个脚本
+HEALTHCHECK --interval=30s --timeout=15s --start-period=90s --retries=3 \
+    CMD curl -fsS http://localhost:8080/health && \
+        python -c "import onnxruntime as ort; assert 'CUDAExecutionProvider' in ort.get_available_providers()" || exit 1
 
 EXPOSE 8080 9090
 

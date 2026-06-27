@@ -165,14 +165,15 @@ async def wildcard_handler(event):
     received.append(("wildcard", event.type))
 
 asyncio.get_event_loop().run_until_complete(bus.emit("test.event", {"key": "value"}, source="test"))
-test("Event delivery", len(received) == 2)
+# V3.0 fix: "test.event" 只匹配精确订阅 "test.event"，不匹配通配符 "market.*"
+test("Event delivery", len(received) == 1)
 test("Event data matches", received[0].data == {"key": "value"})
 test("Event source", received[0].source == "test")
 test("Event category", received[0].category() == EventCategory.SYSTEM)
 
 stats = bus.get_stats()
 test("Event stats total", stats["total_events"] == 1)
-test("Event stats delivered", stats["delivered"] >= 2)
+test("Event stats delivered", stats["delivered"] >= 1)
 
 # Wildcard test
 asyncio.get_event_loop().run_until_complete(bus.emit("market.price_updated", {"price": 100}))

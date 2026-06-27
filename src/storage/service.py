@@ -457,16 +457,19 @@ class StorageService:
             path = db_path.replace("sqlite+aiosqlite:///", "")
             Path(path).parent.mkdir(parents=True, exist_ok=True)
 
-        engine_kwargs: dict = {
-            "pool_pre_ping": self.config.pool_pre_ping,
-        }
-        if not is_sqlite:
-            engine_kwargs.update({
+        # V3.0: SQLite (aiosqlite) 使用 StaticPool，不支持 pool_size / pool_pre_ping 等参数
+        if is_sqlite:
+            engine_kwargs: dict = {
+                "connect_args": {"check_same_thread": False},
+            }
+        else:
+            engine_kwargs = {
+                "pool_pre_ping": self.config.pool_pre_ping,
                 "pool_size": self.config.pool_size,
                 "pool_recycle": self.config.pool_recycle,
                 "pool_timeout": self.config.pool_timeout,
                 "max_overflow": self.config.max_overflow,
-            })
+            }
 
         self._engine = create_async_engine(self.config.url, **engine_kwargs)
         self._session_factory = async_sessionmaker(

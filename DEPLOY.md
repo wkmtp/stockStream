@@ -40,7 +40,7 @@ docker compose -f docker-compose.jetson.yml up -d
 
 ### 4. 验证
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
 ---
@@ -98,5 +98,5 @@ docker compose kill -s SIGHUP app
 
 或在 Web API 中:
 ```bash
-curl -X POST http://localhost:8000/api/v1/config/reload
+curl -X POST http://localhost:8080/api/v1/config/reload
 ```
