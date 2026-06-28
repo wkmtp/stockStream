@@ -351,7 +351,7 @@ def _flatten_dict(d: dict, parent_key: str = "") -> dict:
 
 _DEFAULTS: dict[str, Any] = {
     "host": "0.0.0.0",
-    "port": 8000,
+    "port": 8080,
     "workers": 1,
     "log_level": "info",
     "market": {

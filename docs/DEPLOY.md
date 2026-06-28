@@ -136,7 +136,7 @@ sudo sysctl -p
 
 ```bash
 # Python 虚拟环境
-python3.10 -m venv .venv
+python3.8 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
@@ -163,12 +163,12 @@ sudo systemctl start ai-live
 ```bash
 # 系统依赖
 sudo apt-get update
-sudo apt-get install -y ffmpeg python3.10-venv
+sudo apt-get install -y ffmpeg python3.8-venv
 
 # Python 依赖
-python3.10 -m venv .venv
+python3.8 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-jetson.txt
 ```
 
 ### 2. 初始化

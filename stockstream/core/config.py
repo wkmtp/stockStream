@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="STOCKSTREAM_", env_file=".env")
 
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8080
     db_url: str = "sqlite+aiosqlite:///data/stockstream.db"
     max_memory_mb: int = Field(default=6144, ge=512, le=6144)
     tensorrt_enabled: bool = False

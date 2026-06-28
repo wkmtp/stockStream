@@ -1,5 +1,7 @@
 """FastAPI routes for the StockStream service."""
 
+from __future__ import annotations
+
 import asyncio
 import json as _json
 import logging

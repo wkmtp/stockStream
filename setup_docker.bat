@@ -74,9 +74,9 @@ if %errorlevel% equ 0 (
     echo ============================================
     echo  SUCCESS! StockStream is running.
     echo.
-    echo  Health check: http://localhost:8000/health
-    echo  Stream status: http://localhost:8000/stream/status
-    echo  Agent status:  http://localhost:8000/agent/status
+echo  Health check: http://localhost:8080/health
+echo  Stream status: http://localhost:8080/stream/status
+echo  Agent status:  http://localhost:8080/agent/status
     echo.
     echo  To stop: docker compose down
     echo ============================================

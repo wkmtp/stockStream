@@ -1,4 +1,6 @@
-# Core runtime for Jetson Xavier NX / Ubuntu 20.04 / Python 3.10
+# ⚠️ 已废弃 — 请使用 requirements-jetson.txt (Python 3.8 LTS)
+# 本文件仅保留作为 x86 开发环境参考
+# Jetson Xavier NX 部署: pip install -r requirements-jetson.txt
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 pydantic==2.10.4

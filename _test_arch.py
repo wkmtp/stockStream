@@ -9,6 +9,8 @@
   6. Application 启动流程
 """
 
+from __future__ import annotations
+
 import asyncio
 import importlib
 import sys

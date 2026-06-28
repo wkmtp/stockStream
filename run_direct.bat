@@ -7,7 +7,7 @@ echo.
 
 :: Set environment (same as docker-compose.yml)
 set STOCKSTREAM_HOST=0.0.0.0
-set STOCKSTREAM_PORT=8000
+set STOCKSTREAM_PORT=8080
 set STOCKSTREAM_DB_URL=sqlite+aiosqlite:///data/stockstream.db
 set STOCKSTREAM_MAX_MEMORY_MB=6144
 set STOCKSTREAM_TENSORRT_ENABLED=false
@@ -33,11 +33,11 @@ echo [OK] Dependencies ready
 echo.
 
 :: Start the server
-echo [2/2] Starting StockStream on http://localhost:8000
+echo [2/2] Starting StockStream on http://localhost:8080
 echo.
-echo   Health:        http://localhost:8000/health
-echo   Stream status: http://localhost:8000/stream/status
-echo   Agent status:  http://localhost:8000/agent/status
+echo   Health:        http://localhost:8080/health
+echo   Stream status: http://localhost:8080/stream/status
+echo   Agent status:  http://localhost:8080/agent/status
 echo.
 echo   Press Ctrl+C to stop.
 echo ============================================

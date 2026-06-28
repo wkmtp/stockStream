@@ -37,7 +37,7 @@ docker compose logs app | tail -50
 
 **检查**:
 ```bash
-curl http://localhost:8000/api/v1/monitor | jq '.tts'
+curl http://localhost:8080/api/v1/monitor | jq '.tts'
 ```
 
 **解决**:
@@ -58,7 +58,7 @@ nc -zv <rtmp_host> 1935
 
 **解决**:
 1. RecoveryManager 自动重连（最多 20 次，间隔 3 秒）
-2. 手动恢复: `curl -X POST http://localhost:8000/api/v1/recovery/stream`
+2. 手动恢复: `curl -X POST http://localhost:8080/api/v1/recovery/stream`
 3. 检查 RTMP URL 配置
 
 ---
@@ -89,7 +89,7 @@ docker compose restart
 
 **手动操作**:
 ```bash
-curl -X POST http://localhost:8000/api/v1/resource/release
+curl -X POST http://localhost:8080/api/v1/resource/release
 ```
 
 ---

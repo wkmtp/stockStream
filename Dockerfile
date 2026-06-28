@@ -119,14 +119,19 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PIP_NO_CACHE_DIR=1
 ENV TZ=Asia/Shanghai
 
+# CPU/GPU 库 (CUDA, cuDNN, TensorRT) 已预装在 l4t-base 中
+# Python 3.9 通过 deadsnakes PPA 安装 (Ubuntu 20.04 apt 仅有 3.8)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.10 python3.10-dev python3-pip \
+    software-properties-common gnupg \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    python3.9 python3.9-dev python3.9-distutils python3.9-venv python3-pip \
     curl wget ca-certificates tzdata \
     ffmpeg libsndfile1 libportaudio2 libsqlite3-0 \
     fonts-noto-cjk-extra fonts-liberation \
     build-essential cmake git \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 \
     && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 \
     && groupadd --system stockstream \
     && useradd --system --create-home --shell /bin/bash -g stockstream stockstream \

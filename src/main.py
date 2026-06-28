@@ -1,9 +1,13 @@
-"""StockStream v2.0 主入口 — AI双数字人财经直播平台。
+"""StockStream V3.0 主入口 — AI双数字人财经直播平台。
 
 使用方法:
     python -m src.main                    # 默认模式 (端口 8080)
     python -m src.main --port 8080        # 指定端口
     python -m src.main --jetson           # Jetson Xavier NX 优化模式
+
+目标环境:
+    - Python 3.8  (Jetson Xavier NX / Ubuntu 20.04)
+    - Python 3.10+ (x86_64 开发机)
 """
 
 from __future__ import annotations
@@ -19,6 +23,11 @@ from pathlib import Path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
+
+# ── Python 3.8 compatibility shims (Jetson Xavier NX) ──
+# MUST be imported before any other StockStream modules so that
+# monkey-patches (e.g. asyncio.to_thread) take effect everywhere.
+import src.core.compat  # noqa: F401, E402  — side-effect import
 
 logging.basicConfig(
     level=logging.INFO,

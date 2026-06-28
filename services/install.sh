@@ -5,8 +5,9 @@
 # 前置条件: 项目代码已复制到 /opt/stockstream，依赖已安装
 #   sudo cp -r . /opt/stockstream
 #   cd /opt/stockstream
-#   python3.10 -m venv .venv
-#   .venv/bin/pip install -r requirements.txt
+#   # Jetson Xavier NX (Python 3.8 = Ubuntu 20.04 系统原生)
+#   python3.8 -m venv .venv
+#   .venv/bin/pip install -r requirements-jetson.txt
 #   # Jetson: .venv/bin/pip install onnxruntime-gpu==1.16.3
 #   sudo bash services/install.sh
 

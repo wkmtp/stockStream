@@ -5,10 +5,10 @@
 ### 健康检查
 ```bash
 # API 健康检查
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 
 # 查看所有模块状态
-curl http://localhost:8000/api/v1/monitor
+curl http://localhost:8080/api/v1/monitor
 ```
 
 ### 日志管理
@@ -27,10 +27,10 @@ journalctl -u ai-live -f --since "1 hour ago"
 ### 资源监控
 ```bash
 # 内存使用
-curl http://localhost:8000/api/v1/monitor | jq '.memory_percent'
+curl http://localhost:8080/api/v1/monitor | jq '.memory_percent'
 
 # GPU 使用 (Jetson)
-curl http://localhost:8000/api/v1/monitor | jq '.gpu_percent'
+curl http://localhost:8080/api/v1/monitor | jq '.gpu_percent'
 ```
 
 ---
@@ -45,7 +45,7 @@ docker compose restart
 ### 清理缓存
 ```bash
 # API 方式
-curl -X POST http://localhost:8000/api/v1/cache/clear
+curl -X POST http://localhost:8080/api/v1/cache/clear
 
 # 手动
 rm -rf cache/*
@@ -62,8 +62,8 @@ docker compose exec postgres pg_dump -U stockstream stockstream > backup.sql
 
 ### 模块手动恢复
 ```bash
-curl -X POST http://localhost:8000/api/v1/recovery/market
-curl -X POST http://localhost:8000/api/v1/recovery/all
+curl -X POST http://localhost:8080/api/v1/recovery/market
+curl -X POST http://localhost:8080/api/v1/recovery/all
 ```
 
 ---

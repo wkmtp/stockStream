@@ -103,9 +103,20 @@ class Wav2LipONNX:
 
         try:
             import onnxruntime as ort
+            # ── GPU auto-detect (Jetson CUDA / TensorRT) ──
+            _available = ort.get_available_providers()
+            _preferred = [
+                "TensorrtExecutionProvider",   # Jetson TensorRT 8.x
+                "CUDAExecutionProvider",        # CUDA 11.4
+                "CPUExecutionProvider",         # 最终回退
+            ]
+            _providers = [p for p in _preferred if p in _available]
+            if not _providers:
+                _providers = ["CPUExecutionProvider"]
+            logger.info("ONNX Runtime providers (available=%s, selected=%s)", _available, _providers)
             self._session = ort.InferenceSession(
                 str(model_path),
-                providers=["CPUExecutionProvider"],
+                providers=_providers,
             )
             self._input_names = [inp.name for inp in self._session.get_inputs()]
             self._output_names = [out.name for out in self._session.get_outputs()]
