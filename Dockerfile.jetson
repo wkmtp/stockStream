@@ -6,6 +6,16 @@
 #
 # 构建:  docker build -f Dockerfile.jetson -t stockstream:jetson-latest .
 # 运行:  docker compose -f docker-compose.jetson.yml up -d
+#
+# !!! 重要 !!!
+# 本 Dockerfile 基于 JetPack 5.x (L4T R35.4.1).
+# CUDA / cuDNN / TensorRT 已随 l4t-base 镜像预装, 请勿 apt install:
+#   - nvidia-l4t-core     (不存在, 非 apt 包)
+#   - nvidia-l4t-cuda     (不存在, 非 apt 包)
+#   - nvidia-l4t-cudnn8   (不存在, 非 apt 包)
+#   - nvidia-jetpack      (仅在官方 BSP 仓库中可用, 且无需单独安装)
+# 若需使用 JetPack 6.x (Ubuntu 22.04), 请创建独立的 Dockerfile.jetson-jp6,
+# 并使用 python3.10 (系统自带) 替换 python3.8.
 
 # ================================================================
 # Stage 1: Base — nvcr.io L4T + Python 3.8 系统依赖

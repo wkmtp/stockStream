@@ -24,6 +24,8 @@ ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # ── 系统依赖 (ARM64) ──
+# 注意: CUDA 11.4 / cuDNN 8.6 / TensorRT 8.5 已预装在 l4t-base 镜像中,
+#       不要尝试 apt install nvidia-l4t-* / nvidia-jetpack 等包, 它们不存在或无需单独安装.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.8 python3.8-dev python3.8-venv \
     python3-pip \
@@ -32,8 +34,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libopenmpi-dev \
     libopencv-dev python3-opencv \
     curl ca-certificates htop \
-    # Jetson 专用工具
-    nvidia-jetpack \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ── Python 符号链接 ──

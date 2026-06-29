@@ -111,6 +111,8 @@ CMD ["python", "-u", "main.py"]
 # ================================================================
 # 此 stage 保留用于 docker compose --profile jetson 一键构建
 # 生产 Jetson 构建请使用: docker build -f Dockerfile.jetson -t stockstream:jetson .
+#
+# !!! 重要: CUDA/cuDNN/TensorRT 已预装在 l4t-base 中, 不要 apt install nvidia-l4t-* !!!
 FROM nvcr.io/nvidia/l4t-base:r35.4.1 AS jetpack
 
 ENV DEBIAN_FRONTEND=noninteractive
