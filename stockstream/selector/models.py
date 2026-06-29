@@ -16,7 +16,7 @@ class SignalType(str, Enum):
     CLEAR = "clear_position"
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class StockFeature:
     """Computed technical and fund-flow features for one stock."""
 
@@ -38,7 +38,7 @@ class StockFeature:
     shrinking_volume: bool = False
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class SignalCandidate:
     """One selected stock plus the values that made it pass the signal rule."""
 
@@ -78,7 +78,7 @@ class SignalCandidate:
         }
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class SelectorReport:
     """Top-N selector report returned by the selector service."""
 

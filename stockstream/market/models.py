@@ -17,7 +17,7 @@ class MarketDataset(str, Enum):
     MINUTE_60 = "eastmoney_60m"
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class StockSymbol:
     """A stock symbol plus its inferred Chinese exchange market code."""
 
@@ -43,7 +43,7 @@ class StockSymbol:
         return cls(code=code, market=market)
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class CollectorConfig:
     """Runtime options for the asynchronous market collector."""
 
@@ -65,7 +65,7 @@ class CollectorConfig:
     )
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class CollectionResult:
     """Summary of one dataset collection run."""
 
@@ -89,7 +89,7 @@ class CollectionResult:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class CollectorStatus:
     """Mutable collector health and reconnect state."""
 

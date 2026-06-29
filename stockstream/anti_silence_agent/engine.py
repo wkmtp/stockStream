@@ -22,7 +22,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class SilenceAction:
     """An anti-silence intervention."""
     action_type: str         # "question" | "topic_switch" | "market_joke" | "recap"

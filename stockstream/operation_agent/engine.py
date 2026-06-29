@@ -33,7 +33,7 @@ class OperationAction(str, Enum):
     SLOW_DOWN = "slow_down"              # Decelerate pace
 
 
-@dataclass(slots=True)
+@dataclass()
 class OperationAdvice:
     """Operation agent's advice for content adjustment."""
     action: OperationAction

@@ -11,7 +11,7 @@ import numpy as np
 
 # ── Region rectangle ─────────────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class RegionRect:
     """A rectangular region in the 1920×1080 frame."""
 
@@ -42,7 +42,7 @@ class LayoutPreset(str, Enum):
     CLASSIC = "classic"  # chart-left(62%) + face-right(38%) + data-panel + subtitle-bottom(80)
 
 
-@dataclass(slots=True)
+@dataclass()
 class LayoutConfig:
     """Layout geometry for one preset.
 

@@ -17,7 +17,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class TrafficAction:
     """A traffic-driving action (follow CTA)."""
     message: str

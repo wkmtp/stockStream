@@ -23,7 +23,7 @@ class TTSStatus(str, Enum):
     SKIPPED = "skipped"   # Empty sentence
 
 
-@dataclass(slots=True)
+@dataclass()
 class TTSVoice:
     """Piper voice configuration."""
     name: str = "zh_CN-huayan-medium"
@@ -48,7 +48,7 @@ class TTSVoice:
         return args
 
 
-@dataclass(slots=True)
+@dataclass()
 class Sentence:
     """A single sentence fragment ready for synthesis."""
     index: int
@@ -60,7 +60,7 @@ class Sentence:
             self.char_count = len(self.text)
 
 
-@dataclass(slots=True)
+@dataclass()
 class TTSTask:
     """A TTS task submitted for synthesis."""
     task_id: str
@@ -92,7 +92,7 @@ class TTSTask:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class TTSPlayEvent:
     """Emitted after each sentence is synthesized, for live playback."""
     task_id: str

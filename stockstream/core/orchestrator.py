@@ -60,7 +60,7 @@ from stockstream.chief_director_agent.engine import ChiefDirectorAgent, ShowSche
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class Services:
     """Container for module services used by the web API."""
 

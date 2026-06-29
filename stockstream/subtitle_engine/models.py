@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
-@dataclass(slots=True)
+@dataclass()
 class SubtitleStyle:
     """Visual styling for PNG subtitle rendering."""
 
@@ -35,7 +35,7 @@ class SubtitleStyle:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class SubtitleWord:
     """A single word/character with its timing window."""
 
@@ -48,7 +48,7 @@ class SubtitleWord:
         return self.end_ms - self.start_ms
 
 
-@dataclass(slots=True)
+@dataclass()
 class SrtEntry:
     """One SRT subtitle entry (one line / short segment).
 
@@ -83,7 +83,7 @@ class SrtEntry:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class SubtitleTrack:
     """A complete subtitle track for one narration text.
 

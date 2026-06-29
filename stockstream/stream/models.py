@@ -18,7 +18,7 @@ class StreamState(str, Enum):
     RECONNECTING = "reconnecting"
 
 
-@dataclass(slots=True)
+@dataclass()
 class StreamConfig:
     """FFmpeg RTMP streaming configuration.
 

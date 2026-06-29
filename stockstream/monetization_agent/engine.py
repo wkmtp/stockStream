@@ -31,7 +31,7 @@ class MonetizeType(str, Enum):
     AD = "advertisement"              # 广告插播
 
 
-@dataclass(slots=True)
+@dataclass()
 class MonetizeAction:
     """A commercial operation action."""
     action_type: MonetizeType

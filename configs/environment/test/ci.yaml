@@ -1,0 +1,48 @@
+# CI 测试环境
+# GitHub Actions / Jenkins, 无 GPU, 自动执行
+extends: test
+
+platform: desktop
+mode: test
+
+server:
+  host: "127.0.0.1"
+  port: 18080
+  reload: false
+  debug: false
+  workers: 1
+
+gpu:
+  enabled: false
+  onnx_providers: ["CPUExecutionProvider"]
+  fp16: false
+
+market:
+  real_data: false
+  mock_fallback: true   # CI 中必须用模拟数据
+
+interaction:
+  real_danmu: false
+  mock_enabled: true
+
+avatar:
+  enabled: false        # CI 跳过重模型
+  multi_avatar: false
+
+tts:
+  enabled: false        # CI 跳过 TTS
+
+subtitle:
+  enabled: true
+
+monitor:
+  enabled: false
+
+security:
+  auth_required: false
+  rate_limit: false
+
+logging:
+  level: WARNING
+  console: false
+  file: true

@@ -22,7 +22,7 @@ class AnalysisEngine(str, Enum):
     DEEPSEEK = "deepseek"    # DeepSeek 云 API（LLM）
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class StockContext:
     """Technical + fund-flow context for a single stock."""
 
@@ -68,7 +68,7 @@ class StockContext:
         }
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class MarketContext:
     """Aggregate market overview context."""
 
@@ -96,7 +96,7 @@ class MarketContext:
         }
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class SectorContext:
     """Aggregate sector analysis context."""
 
@@ -122,7 +122,7 @@ class SectorContext:
         }
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(frozen=True)
 class AnalysisResult:
     """Unified analysis result returned to callers."""
 

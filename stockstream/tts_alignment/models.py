@@ -14,7 +14,7 @@ class AlignmentMethod(str, enum.Enum):
     CHAR_COUNT = "chars"        # pure character-count estimation (last resort)
 
 
-@dataclass(slots=True)
+@dataclass()
 class AlignmentWord:
     """A single aligned word/character with its timing window.
 
@@ -51,7 +51,7 @@ class AlignmentWord:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class AlignmentResult:
     """Complete forced-alignment result for one text+audio pair.
 

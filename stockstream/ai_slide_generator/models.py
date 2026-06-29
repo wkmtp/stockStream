@@ -63,7 +63,7 @@ class SlideType(str, Enum):
 
 # ── Slide configuration ─────────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class SlideConfig:
     """Rendering configuration for one slide page.
 
@@ -132,7 +132,7 @@ class SlideConfig:
 
 # ── Slide data per stock ────────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class StockSlideCard:
     """Data for one stock card on a slide."""
 

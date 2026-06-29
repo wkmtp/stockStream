@@ -48,7 +48,7 @@ class SignalKind(str, Enum):
 # ── data containers ──────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class Position:
     """A single stock holding."""
 
@@ -100,7 +100,7 @@ class Position:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class Transaction:
     """A single completed trade."""
 
@@ -139,7 +139,7 @@ class Transaction:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class Portfolio:
     """Full trading portfolio state."""
 
@@ -205,7 +205,7 @@ class Portfolio:
         )
 
 
-@dataclass(slots=True)
+@dataclass()
 class EvalSignal:
     """Result of evaluating trading rules against a position."""
 
@@ -217,7 +217,7 @@ class EvalSignal:
     rule_detail: str = ""
 
 
-@dataclass(slots=True)
+@dataclass()
 class EvalResult:
     """Batch evaluation result for all held positions."""
 

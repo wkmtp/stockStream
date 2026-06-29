@@ -1,0 +1,45 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Desktop Docker Compose
+# ============================================================
+# 用法: docker compose -f docker/desktop/docker-compose.yml up -d
+
+version: "3.8"
+
+services:
+  ai-live-desktop:
+    build:
+      context: ../..
+      dockerfile: docker/desktop/Dockerfile
+    image: ai-live-desktop:4.0.0
+    container_name: ai-live-desktop
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    environment:
+      - STOCKSTREAM_PLATFORM=desktop
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ../../data:/opt/stockstream/data
+      - ../../logs:/opt/stockstream/logs
+      - ../../models:/opt/stockstream/models:ro
+      - ../../configs:/opt/stockstream/configs:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"

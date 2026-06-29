@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 
-@dataclass(slots=True)
+@dataclass()
 class IndexData:
     """Single index quote (上证/深证/创业板)."""
 
@@ -70,7 +70,7 @@ class IndexData:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class NorthboundFlow:
     """北向资金实时流向."""
 
@@ -102,7 +102,7 @@ class NorthboundFlow:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class LimitStats:
     """涨跌停统计."""
 
@@ -126,7 +126,7 @@ class LimitStats:
         return {"limit_up": self.limit_up, "limit_down": self.limit_down}
 
 
-@dataclass(slots=True)
+@dataclass()
 class AdvanceDeclineStats:
     """涨跌家数统计."""
 
@@ -147,7 +147,7 @@ class AdvanceDeclineStats:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class HotSector:
     """热点板块."""
 
@@ -167,7 +167,7 @@ class HotSector:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class FundFlowSummary:
     """全市场资金流向汇总."""
 
@@ -220,7 +220,7 @@ class DashboardData:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class DashboardResult:
     """Rendered dashboard output."""
 
@@ -233,7 +233,7 @@ class DashboardResult:
     generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-@dataclass(slots=True)
+@dataclass()
 class DashboardConfig:
     """Dashboard rendering configuration."""
 

@@ -31,7 +31,7 @@ class GiftResponseType(str, Enum):
     TOP_DONOR = "top_donor"             # 上榜感谢
 
 
-@dataclass(slots=True)
+@dataclass()
 class GiftInteraction:
     """A gift interaction response."""
     username: str

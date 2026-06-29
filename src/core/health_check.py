@@ -29,7 +29,12 @@ class ModuleHealth(Enum):
 
 
 @dataclass
-class ModuleStatus:
+class ModuleHealthStatus:
+    """单个模块的运行时健康状态快照。
+
+    与 base.ModuleStatus (Enum, 生命周期状态) 不同, 本类关注的是
+    HEALTHY / DEGRADED / WARNING / CRITICAL 等运维健康维度。
+    """
     name: str
     health: ModuleHealth = ModuleHealth.UNKNOWN
     last_check: float = 0.0
@@ -45,7 +50,7 @@ class SystemHealth:
     status: ModuleHealth = ModuleHealth.HEALTHY
     timestamp: float = 0.0
     uptime_seconds: float = 0.0
-    modules: dict[str, ModuleStatus] = field(default_factory=dict)
+    modules: dict[str, ModuleHealthStatus] = field(default_factory=dict)
     resources: dict[str, Any] = field(default_factory=dict)
     stream_health: dict[str, Any] = field(default_factory=dict)
 
@@ -83,9 +88,9 @@ class HealthCheckService:
     def __init__(self, bus: EventBus | None = None) -> None:
         self._bus = bus
         self._started_at: float = time.time()
-        self._module_states: dict[str, ModuleStatus] = {}
+        self._module_states: dict[str, ModuleHealthStatus] = {}
         for name in self.MONITORED_MODULES:
-            self._module_states[name] = ModuleStatus(name=name)
+            self._module_states[name] = ModuleHealthStatus(name=name)
         self._running = False
         self._refresh_task: asyncio.Task | None = None
 
@@ -162,7 +167,7 @@ class HealthCheckService:
                           error: str = "", metrics: dict | None = None) -> None:
         """手动设置模块状态（供外部模块调用）。"""
         if name not in self._module_states:
-            self._module_states[name] = ModuleStatus(name=name)
+            self._module_states[name] = ModuleHealthStatus(name=name)
         s = self._module_states[name]
         s.health = health
         s.last_check = time.time()

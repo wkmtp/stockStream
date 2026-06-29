@@ -44,7 +44,7 @@ class AvatarStatus(str, Enum):
 # ═══════════════════════════════════════════════════════════════════
 
 
-@dataclass(slots=True)
+@dataclass()
 class FaceBox:
     """Detected face bounding box + landmarks."""
     x: int
@@ -86,7 +86,7 @@ class FaceBox:
 # ═══════════════════════════════════════════════════════════════════
 
 
-@dataclass(slots=True)
+@dataclass()
 class MelSpectrogram:
     """Mel spectrogram extracted from WAV audio for Wav2Lip input.
 
@@ -110,7 +110,7 @@ class MelSpectrogram:
 # ═══════════════════════════════════════════════════════════════════
 
 
-@dataclass(slots=True)
+@dataclass()
 class AvatarConfig:
     """Wav2Lip ONNX model paths and generation parameters."""
 
@@ -149,7 +149,7 @@ class AvatarConfig:
 # ═══════════════════════════════════════════════════════════════════
 
 
-@dataclass(slots=True)
+@dataclass()
 class AvatarTask:
     """A single avatar generation task — image + audio → MP4."""
 
@@ -187,7 +187,7 @@ class AvatarTask:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class AvatarResult:
     """Completed avatar generation result."""
 

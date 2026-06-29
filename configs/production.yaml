@@ -1,0 +1,41 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — 生产环境配置
+# ============================================================
+# 用途:      正式部署 (Desktop 或 Jetson)
+# 继承:      平台特定配置后，本文件作为最终覆盖
+# 优先级:    最高 (仅次于环境变量)
+
+server:
+  workers: 2
+
+logging:
+  level: "WARNING"
+  json_format: true
+  rotation: "midnight"
+
+market:
+  retry_max: 5
+  retry_backoff: 3.0
+
+monitor:
+  enabled: true
+  alerts:
+    webhook_url: ""           # 告警 Webhook URL
+    dingtalk_url: ""          # 钉钉机器人
+
+security:
+  api_token_enabled: true
+  encrypt_config: true
+  log_sanitize: true
+  rate_limit_per_minute: 60
+  cookie_secure: true
+  cookie_httponly: true
+
+storage:
+  backup_interval_hours: 12
+  backup_retention_days: 90
+
+scheduler:
+  enabled: true
+  auto_start: true
+  auto_stop: true

@@ -41,7 +41,7 @@ class ClipLength(str, Enum):
     LONG_90 = "90s"
 
 
-@dataclass(slots=True)
+@dataclass()
 class ClipTask:
     """A clip generation task."""
     clip_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])

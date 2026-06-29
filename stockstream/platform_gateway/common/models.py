@@ -47,7 +47,7 @@ class GiftLevel(str, Enum):
 
 # ── Events ───────────────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class BaseEvent:
     """Base class for all live events."""
     platform: Platform
@@ -57,7 +57,7 @@ class BaseEvent:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass(slots=True)
+@dataclass()
 class CommentEvent(BaseEvent):
     """A viewer comment/chat message."""
     event_type: LiveEventType = LiveEventType.COMMENT
@@ -81,7 +81,7 @@ class CommentEvent(BaseEvent):
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class LikeEvent(BaseEvent):
     """A like event."""
     event_type: LiveEventType = LiveEventType.LIKE
@@ -103,7 +103,7 @@ class LikeEvent(BaseEvent):
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class GiftEvent(BaseEvent):
     """A gift/donation event."""
     event_type: LiveEventType = LiveEventType.GIFT
@@ -131,7 +131,7 @@ class GiftEvent(BaseEvent):
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class FollowEvent(BaseEvent):
     """A follow/unfollow event."""
     event_type: LiveEventType = LiveEventType.FOLLOW
@@ -151,7 +151,7 @@ class FollowEvent(BaseEvent):
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class ViewerEvent(BaseEvent):
     """Viewer count update."""
     event_type: LiveEventType = LiveEventType.VIEWER_COUNT

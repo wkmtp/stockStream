@@ -28,7 +28,7 @@ class LikeThreshold(Enum):
     MASSIVE = 10000   # 大事感谢
 
 
-@dataclass(slots=True)
+@dataclass()
 class EngagementAction:
     """An engagement action triggered by likes."""
     username: str

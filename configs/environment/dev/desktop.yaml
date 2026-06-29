@@ -1,0 +1,46 @@
+# 开发环境 (dev-desktop)
+# Python 3.10+, RTX GPU, 全功能开启, 热重载
+extends: base
+
+platform: desktop
+mode: development
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  reload: true
+  debug: true
+  workers: 1
+
+gpu:
+  enabled: true
+  cuda_version: "12.x"
+  onnx_providers: ["CUDAExecutionProvider"]
+  fp16: false          # 开发用 FP32 便于调试
+  benchmark: false
+
+market:
+  real_data: true
+  mock_fallback: false
+
+interaction:
+  real_danmu: true
+  mock_enabled: false
+
+avatar:
+  enabled: true
+  multi_avatar: true
+  large_model: true
+
+monitor:
+  enabled: true
+  dashboard: true
+
+security:
+  auth_required: false  # 开发免认证
+  rate_limit: false
+
+logging:
+  level: DEBUG
+  console: true
+  file: true

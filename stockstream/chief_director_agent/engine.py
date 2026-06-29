@@ -81,7 +81,7 @@ class ContentPriority(int, Enum):
     BACKGROUND = 4     # Can skip
 
 
-@dataclass(slots=True)
+@dataclass()
 class DirectorDecision:
     """A scheduling decision from the chief director."""
     decision_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
@@ -106,7 +106,7 @@ class DirectorDecision:
 
 # ── Default Show Schedule ───────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class ShowSchedule:
     """Define what the director should run and at what intervals."""
     # Segment intervals in seconds

@@ -1,0 +1,54 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Release: dev-desktop
+# ============================================================
+# 用途:     开发者本机开发调试
+# 平台:     Windows / Ubuntu Desktop + RTX GPU
+# Python:   3.10+
+# 继承链:   base → desktop → environment/dev/desktop → 本文件
+# ============================================================
+
+extends: [desktop, environment/dev/desktop]
+
+release:
+  name: "dev-desktop"
+  target: "development"
+  description: "开发版本 - 热重载 + 全GPU + 调试日志"
+
+platform: desktop
+mode: development
+
+# 开发环境额外配置
+dev:
+  hot_reload: true
+  debug_toolbar: true
+  profiler_enabled: false
+  mock_external_api: false
+  log_sql_queries: true
+  cache_enabled: false          # 开发禁缓存方便调试
+  verbose_errors: true
+  cors_allow_all: true
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  reload: true
+  debug: true
+  workers: 1
+
+gpu:
+  enabled: true
+  onnx_providers: ["CUDAExecutionProvider"]
+  fp16: false                   # FP32 方便调试
+  benchmark: false
+
+monitor:
+  enabled: true
+  dashboard: true
+  alerts:
+    enabled: false              # 开发不发送告警
+
+logging:
+  level: "DEBUG"
+  console: true
+  file: true
+  json_format: false

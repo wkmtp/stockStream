@@ -343,7 +343,7 @@ ALL_KEYWORDS_BY_SCENE: dict[SceneType, list[str]] = _build_keywords_by_scene()
 
 # ── match result dataclasses ───────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class MatchedIndicator:
     """A single detected indicator from the commentary text."""
 
@@ -362,7 +362,7 @@ class MatchedIndicator:
         return self.category.label
 
 
-@dataclass(slots=True)
+@dataclass()
 class MatchResult:
     """Full analysis result for a commentary text.
 

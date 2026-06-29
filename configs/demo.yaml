@@ -1,0 +1,60 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Demo 演示配置
+# ============================================================
+# 用途:      客户演示 / 快速体验
+# 特性:      全模拟数据，零外部依赖
+# Python:    3.8+
+# 无需:      东方财富 / 直播平台 / GPU
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 1
+  cors_origins: ["*"]
+
+logging:
+  level: "INFO"
+  json_format: false
+
+# ── 全模拟模式 ──
+market:
+  provider: "mock"            # 模拟行情数据
+
+analysis:
+  pattern_recognition: false
+
+dialogue:
+  max_context_turns: 5
+
+avatar:
+  enabled: false              # Demo 跳过视频合成
+
+tts:
+  engine: "piper"             # 轻量级 TTS
+  fp16: true
+  sample_rate: 16000
+
+subtitle:
+  enabled: true
+
+chart:
+  width: 1280
+  height: 720
+  fps: 10                     # Demo 降低帧率
+
+interaction:
+  danmaku_enabled: true
+  fake_viewers_base: 1000
+
+storage:
+  database_url: "sqlite:///data/demo.db"
+
+monitor:
+  enabled: false
+
+scheduler:
+  enabled: false
+
+security:
+  api_token_enabled: false
+  rate_limit_per_minute: 1000

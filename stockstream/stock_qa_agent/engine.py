@@ -95,7 +95,7 @@ QUESTION_INTENT_RE = re.compile(
 )
 
 
-@dataclass(slots=True)
+@dataclass()
 class StockQAAnswer:
     """A generated Q&A answer."""
     question: str

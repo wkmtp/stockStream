@@ -1,0 +1,98 @@
+# ============================================================
+# StockStream V4.0 — Prometheus Alert Rules
+# ============================================================
+
+groups:
+  - name: stockstream_alerts
+    rules:
+      # ── 系统资源 ──
+      - alert: HighCPUUsage
+        expr: cpu_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU 使用率过高: {{ $value }}%"
+          description: "{{ $labels.service }} CPU 超过 80% 已持续 5 分钟"
+
+      - alert: CriticalCPUUsage
+        expr: cpu_percent > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CPU 严重过载: {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: memory_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "内存使用率过高: {{ $value }}%"
+
+      - alert: CriticalMemoryUsage
+        expr: memory_percent > 95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "内存即将耗尽: {{ $value }}%"
+
+      - alert: HighGPUMemory
+        expr: gpu_memory_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GPU 显存使用率过高: {{ $value }}%"
+
+      - alert: GPUOverheating
+        expr: gpu_temperature > 85
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GPU 过热: {{ $value }}°C"
+
+      # ── 应用层 ──
+      - alert: ApplicationDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "StockStream 服务不可用"
+
+      - alert: HighInferenceLatency
+        expr: frame_latency_ms > 2000
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "推理延迟过高: {{ $value }}ms"
+
+      - alert: WebSocketConnectionDrop
+        expr: websocket_connections == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "WebSocket 连接丢失"
+
+      # ── Jetson 专属 ──
+      - alert: JetsonThermalThrottling
+        expr: jetson_throttling_active == 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Jetson 温度降频触发"
+
+      - alert: JetsonLowDisk
+        expr: disk_free_gb < 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Jetson 磁盘空间不足: {{ $value }}GB"

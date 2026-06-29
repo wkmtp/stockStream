@@ -39,7 +39,7 @@ def test_stream_guard_heartbeat():
 
 def test_health_check_service_import():
     """HealthCheckService 可正常导入。"""
-    from src.core.health_check import HealthCheckService, ModuleHealth, ModuleStatus
+    from src.core.health_check import HealthCheckService, ModuleHealth, ModuleHealthStatus
     hc = HealthCheckService()
     assert len(hc.MONITORED_MODULES) == 20
     hc.set_module_status("market_service", ModuleHealth.HEALTHY)

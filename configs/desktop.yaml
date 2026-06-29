@@ -1,0 +1,49 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Desktop 平台配置
+# ============================================================
+# 运行环境: Windows / Linux Desktop + RTX 显卡
+# Python:    3.10+
+# CUDA:      12.x
+# 用途:      开发调试 / 生产部署
+
+# 继承自 base.yaml，仅覆盖桌面平台差异
+
+server:
+  workers: 4
+
+logging:
+  level: "DEBUG"
+  json_format: false
+
+market:
+  provider: "akshare"
+
+analysis:
+  pattern_recognition: true   # 桌面端可开启模式识别
+
+dialogue:
+  max_context_turns: 20
+  temperature: 0.8
+
+avatar:
+  fp16: false                 # 桌面 GPU 用 FP32 保证质量
+  batch_size: 2
+
+tts:
+  engine: "edge"
+  fp16: false
+
+storage:
+  database_url: "sqlite:///data/stockstream.db"
+
+monitor:
+  enabled: false              # 开发环境关闭监控开销
+
+scheduler:
+  enabled: false              # 按需手动启停
+
+security:
+  api_token_enabled: false
+  encrypt_config: false
+  log_sanitize: false
+  rate_limit_per_minute: 1000

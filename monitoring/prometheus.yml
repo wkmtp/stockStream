@@ -1,0 +1,38 @@
+# ============================================================
+# StockStream V4.0 — Prometheus Metrics Configuration
+# ============================================================
+# 暴露: /metrics (Port 9090)
+# ============================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["localhost:9093"]
+
+rule_files:
+  - "alerts/*.yml"
+
+scrape_configs:
+  - job_name: "stockstream"
+    metrics_path: "/monitor/api/metrics"
+    static_configs:
+      - targets: ["localhost:8080"]
+        labels:
+          service: "stockstream"
+          environment: "${STOCKSTREAM_ENV}"
+
+  - job_name: "stockstream-prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Jetson 节点监控 (tegrastats exporter)
+  - job_name: "jetson-tegrastats"
+    static_configs:
+      - targets: ["localhost:9100"]
+        labels:
+          hardware: "jetson-xavier-nx"

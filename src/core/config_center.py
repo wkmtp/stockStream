@@ -32,11 +32,9 @@ from typing import Any, ClassVar
 
 import yaml
 
+from src.core.base import ConfigError
+
 logger = logging.getLogger(__name__)
-
-
-class ConfigError(Exception):
-    """配置相关错误。"""
 
 
 class ConfigValidationError(ConfigError):

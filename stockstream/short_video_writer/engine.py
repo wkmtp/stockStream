@@ -20,7 +20,7 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass()
 class VideoCopy:
     """Copywriting package for a short video clip."""
     clip_id: str

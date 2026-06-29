@@ -1,0 +1,115 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — CI Pipeline
+# ============================================================
+# 触发: push 到 main / develop, PR
+# 测试: unit + integration + smoke
+# 矩阵: Desktop (x86) + Demo 模式
+
+name: CI - Test & Build
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore: ['docs/**', '*.md']
+  pull_request:
+    branches: [main]
+    paths-ignore: ['docs/**', '*.md']
+
+env:
+  PYTHON_VERSION: "3.11"
+  STOCKSTREAM_PLATFORM: test
+
+jobs:
+  # ── 代码质量检查 ──
+  lint:
+    name: Lint & Static Analysis
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install linters
+        run: pip install flake8 ruff mypy
+      - name: Ruff check
+        run: ruff check src/ --select=E,F,W --ignore=E501
+      - name: Mypy type check
+        run: mypy src/ --ignore-missing-imports --follow-imports=skip || true
+      - name: Python 3.8 compat check
+        run: |
+          pip install vermin
+          vermin --no-parse-comments --eval-annotations -t=3.8- src/ 2>&1 | head -50 || true
+
+  # ── 单元测试 ──
+  unit:
+    name: Unit Tests (Python ${{ matrix.python }})
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python: ["3.8", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          pip install -r requirements/common.txt
+          pip install pytest pytest-cov pytest-asyncio
+      - name: Run tests
+        run: |
+          pytest tests/unit/ -v --cov=src --cov-report=xml -p no:warnings
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-py${{ matrix.python }}
+          path: coverage.xml
+
+  # ── 集成测试 ──
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          pip install -r requirements/common.txt -r requirements/demo.txt
+          pip install pytest pytest-asyncio httpx
+      - name: Run integration tests
+        run: pytest tests/integration/ -v -p no:warnings --timeout=120
+
+  # ── Demo 冒烟测试 ──
+  smoke-demo:
+    name: Smoke Test (Demo Mode)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          pip install -r requirements/common.txt -r requirements/demo.txt
+      - name: Start & health check
+        run: |
+          echo "Smoke test placeholder — API health check will be added"
+          # python -m src.main &
+          # sleep 10
+          # curl -f http://localhost:8080/health
+
+  # ── Docker 构建验证 ──
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-22.04
+    needs: [unit, integration]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build demo image
+        run: docker build -f docker/demo/Dockerfile -t ai-live-demo:ci .
+      - name: Build desktop image
+        run: docker build -f docker/desktop/Dockerfile -t ai-live-desktop:ci .

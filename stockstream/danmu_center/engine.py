@@ -46,7 +46,7 @@ class DanmuTag(str, Enum):
     NORMAL = "normal"             # 普通
 
 
-@dataclass(slots=True)
+@dataclass()
 class DanmuMessage:
     """Unified danmu message after processing."""
     platform: Platform

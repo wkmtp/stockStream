@@ -1,0 +1,80 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Jetson 平台配置
+# ============================================================
+# 硬件:     NVIDIA Jetson Xavier NX 8GB
+# 系统:     Ubuntu 20.04 LTS
+# JetPack:  5.x
+# CUDA:     11.4
+# TensorRT: 8.x
+# Python:   3.8.10 (系统原生)
+# CPU:      ARM64
+# GPU:      Volta (384 CUDA cores + 48 Tensor cores)
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 1                  # ARM64 单 worker 避免内存爆炸
+
+logging:
+  level: "WARNING"            # 生产环境减少 IO
+  json_format: true           # 结构化日志便于采集
+  file: "logs/stockstream.log"
+  rotation: "midnight"
+  max_bytes: 52428800         # 50MB (Jetson 磁盘限制)
+  backup_count: 3
+
+market:
+  cache_ttl_seconds: 600      # Jetson 延长缓存
+  update_interval: 10
+  retry_max: 5
+
+analysis:
+  kline_periods: ["1d", "1w"]  # 减少指标计算量
+  indicators: ["ma", "macd", "rsi"]  # 精简指标
+  pattern_recognition: false
+
+dialogue:
+  max_context_turns: 5
+  temperature: 0.6
+  max_tokens: 256
+
+avatar:
+  fps: 15                     # Jetson 降低帧率
+  resolution: [384, 384]      # 降低分辨率
+  fp16: true
+  batch_size: 1
+  face_detector_interval: 3   # 每 3 帧检测一次人脸
+
+tts:
+  engine: "piper"
+  fp16: true
+  sample_rate: 16000          # 降低采样率
+
+subtitle:
+  font_size: 20
+
+chart:
+  width: 1280
+  height: 720
+  fps: 15
+  dpi: 72
+
+interaction:
+  max_danmaku_per_frame: 5
+
+monitor:
+  enabled: true
+  sample_interval: 15         # 降低采样频率
+  alert_thresholds:
+    cpu_percent: 70
+    gpu_percent: 80
+    memory_percent: 85
+    gpu_memory_percent: 80
+
+scheduler:
+  enabled: true
+
+storage:
+  database_url: "sqlite:///data/stockstream.db"
+  backup_interval_hours: 6    # 更频繁备份 (Jetson 风险更高)
+  backup_retention_days: 14

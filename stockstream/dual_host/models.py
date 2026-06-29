@@ -66,7 +66,7 @@ EMOTION_ACTION_MAP: dict[Emotion, dict[Speaker, AvatarAction]] = {
 
 # ── Dialogue ───────────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class DialogTurn:
     """A single spoken line in the dialogue script."""
     speaker: Speaker
@@ -89,7 +89,7 @@ class DialogTurn:
         }
 
 
-@dataclass(slots=True)
+@dataclass()
 class DialogueScript:
     """Complete dialogue for one segment (stock/sector/news/etc)."""
     segment_id: str
@@ -137,7 +137,7 @@ class ShowSegmentType(str, Enum):
 
 # ── Director schedule slots ────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class ScheduleSlot:
     """A scheduled segment in the show rundown."""
     segment_type: ShowSegmentType
@@ -159,7 +159,7 @@ DEFAULT_SCHEDULE: list[ScheduleSlot] = [
 
 # ── DualHost Config ────────────────────────────────────────────
 
-@dataclass(slots=True)
+@dataclass()
 class DualHostConfig:
     """Configuration for the dual-host live system."""
     # TTS voices — true dual-voice via separate ONNX models
