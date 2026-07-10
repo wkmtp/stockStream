@@ -1,33 +1,32 @@
 # StockStream V3.0 — Dockerfile for Jetson Xavier NX LTS Production Edition
 #
 # 目标:       Jetson Xavier NX 8GB / JetPack 5.1.x / Ubuntu 20.04
-# Python:     3.8.10 (系统原生, 无需 deadsnakes PPA)
-# CUDA:       11.4 / TensorRT: 8.5 / ONNX Runtime GPU: 1.16.3
+# Python:     3.9.x (deadsnakes PPA, 因为 akshare/tushare 等库已不再支持 3.8)
+# CUDA:       11.4 / TensorRT: 8.5 / ONNX Runtime: 1.16.3
 #
 # 构建:  docker build -f Dockerfile.jetson -t stockstream:jetson-latest .
 # 运行:  docker compose -f docker-compose.jetson.yml up -d
 #
 # !!! 重要 !!!
 # 本 Dockerfile 基于 JetPack 5.x (L4T R35.4.1).
+# Python 3.9 通过 deadsnakes PPA 安装 (Ubuntu 20.04 原生仅提供 3.8).
 # CUDA / cuDNN / TensorRT 已随 l4t-base 镜像预装, 请勿 apt install:
 #   - nvidia-l4t-core     (不存在, 非 apt 包)
 #   - nvidia-l4t-cuda     (不存在, 非 apt 包)
 #   - nvidia-l4t-cudnn8   (不存在, 非 apt 包)
 #   - nvidia-jetpack      (仅在官方 BSP 仓库中可用, 且无需单独安装)
-# 若需使用 JetPack 6.x (Ubuntu 22.04), 请创建独立的 Dockerfile.jetson-jp6,
-# 并使用 python3.10 (系统自带) 替换 python3.8.
 
 # ================================================================
-# Stage 1: Base — nvcr.io L4T + Python 3.8 系统依赖
+# Stage 1: Base — nvcr.io L4T + Python 3.9 (deadsnakes PPA)
 # ================================================================
-FROM nvcr.io/nvidia/l4t-base:r35.4.1 AS base
+FROM nvcr.io/nvidia/l4t-base:35.4.1 AS base
 
 LABEL maintainer="StockStream Team"
-LABEL version="3.0.0-jetson-py38-lts"
-LABEL description="AI-powered financial dual-avatar live streaming — Jetson Xavier NX Python 3.8 Production Ready"
+LABEL version="3.0.0-jetson-py39"
+LABEL description="AI-powered financial dual-avatar live streaming — Jetson Xavier NX Python 3.9 Production Ready"
 LABEL target.hardware="NVIDIA Jetson Xavier NX 8GB (ARM64 / Volta)"
 LABEL target.jetpack="5.1.x (L4T R35.4.1)"
-LABEL target.python="3.8.10"
+LABEL target.python="3.9"
 LABEL target.cuda="11.4"
 LABEL target.tensorrt="8.5"
 
@@ -38,10 +37,14 @@ ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV TZ=Asia/Shanghai
 
-# ── 系统依赖 (Python 3.8 = Ubuntu 20.04 原生) ──
-# CUDA 11.4 / cuDNN 8.6 / TensorRT 8.5 已预装在 l4t-base 镜像
+# ── 系统依赖 + Python 3.9 (deadsnakes PPA) ──
+# Ubuntu 20.04 原生只有 Python 3.8, 需要 deadsnakes PPA 获得 3.9.
+# CUDA 11.4 / cuDNN 8.6 / TensorRT 8.5 已预装在 l4t-base 镜像.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.8 python3.8-dev python3.8-distutils python3.8-venv python3-pip \
+    software-properties-common gnupg \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    python3.9 python3.9-dev python3.9-distutils python3.9-venv python3-pip \
     curl wget ca-certificates tzdata \
     ffmpeg \
     libsndfile1 libportaudio2 \
@@ -51,8 +54,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Python 3.8 设为默认 ──
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1 && \
+# ── Python 3.9 设为默认 ──
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1 && \
     python -m pip install --upgrade pip==23.0.1 setuptools==68.0.0 wheel==0.41.3
 
@@ -65,16 +69,22 @@ RUN groupadd --system stockstream && \
 WORKDIR /app
 
 # ================================================================
-# Stage 2: Dependencies — Python 3.8 兼容包 + Jetson GPU 推理
+# Stage 2: Dependencies — Python 3.9 兼容包 + Jetson 推理
 # ================================================================
 FROM base AS dependencies
 
 COPY requirements-jetson.txt .
 
 RUN pip install --upgrade pip==23.0.1 setuptools==68.0.0 && \
-    pip install -r requirements-jetson.txt && \
-    # onnxruntime-gpu 1.16.3 = JetPack 5.1.x (CUDA 11.4 / TensorRT 8.5) 兼容
-    pip install onnxruntime-gpu==1.16.3
+    pip install -r requirements-jetson.txt
+
+# ── ONNX Runtime (Jetson ARM64) ──
+# PyPI 不提供 onnxruntime-gpu 的 aarch64 wheel.
+# 使用 CPU 版 onnxruntime (PyPI 有 aarch64 wheel) +
+# JetPack 自带的 CUDA 11.4 / TensorRT 8.5 共享库.
+# Wav2Lip ONNX 模型在 CPU 上也能达到可用的推理速度.
+# 如需 GPU 加速, 可从源码编译 onnxruntime-gpu, 或使用 NVIDIA 官方 pip 源.
+# pip install onnxruntime-gpu --extra-index-url https://pypi.ngc.nvidia.com
 
 # ================================================================
 # Stage 3: Jetson Production — 最终运行镜像

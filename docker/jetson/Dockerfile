@@ -4,9 +4,10 @@
 # 目标:   NVIDIA Jetson Xavier NX 8GB + JetPack 5.x
 # CUDA:   11.4
 # TensorRT: 8.x
-# Python: 3.8 (L4T 系统原生)
+# Python: 3.9 (deadsnakes PPA, akshare 不再支持 3.8)
 # 用法:
 #   docker build -f docker/jetson/Dockerfile -t ai-live-jetson .
+
 
 # ── NVIDIA L4T + JetPack 5.1.2 为基础 ──
 # nvcr.io 镜像自带 CUDA 11.4 / TensorRT 8.5 / OpenCV 4.5
@@ -24,10 +25,13 @@ ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # ── 系统依赖 (ARM64) ──
-# 注意: CUDA 11.4 / cuDNN 8.6 / TensorRT 8.5 已预装在 l4t-base 镜像中,
-#       不要尝试 apt install nvidia-l4t-* / nvidia-jetpack 等包, 它们不存在或无需单独安装.
+# Python 3.9 通过 deadsnakes PPA 安装 (Ubuntu 20.04 原生仅 3.8)
+# CUDA 11.4 / cuDNN 8.6 / TensorRT 8.5 已预装在 l4t-base 镜像中.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3.8 python3.8-dev python3.8-venv \
+    software-properties-common gnupg \
+    && add-apt-repository -y ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y --no-install-recommends \
+    python3.9 python3.9-dev python3.9-venv \
     python3-pip \
     ffmpeg \
     libsndfile1 libopenblas-dev \
@@ -37,8 +41,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ── Python 符号链接 ──
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1 && \
-    python3.8 -m pip install --upgrade pip setuptools wheel
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1 && \
+    python3.9 -m pip install --upgrade pip setuptools wheel
 
 # ── 创建用户 ──
 RUN groupadd -r stockstream && useradd -r -g stockstream -m -s /bin/bash stockstream
