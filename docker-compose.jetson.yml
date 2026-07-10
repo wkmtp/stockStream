@@ -1,0 +1,212 @@
+# StockStream V3.0 — Docker Compose for Jetson Xavier NX / AGX Orin
+#
+# 一键部署:
+#   docker compose -f docker-compose.jetson.yml up -d
+#
+# 查看监控:
+#   http://<jetson-ip>:8080/monitor    # 内置监控仪表盘
+#   http://<jetson-ip>:8080/health     # 健康检查
+#   http://<jetson-ip>:8080/live       # 直播页面
+#   http://<jetson-ip>:8080/docs       # API 文档
+#
+# Jetson 优化 (自动):
+#   - ONNX Runtime TensorRT FP16 推理
+#   - GPU h264_nvenc 硬件编码
+#   - 内存限制 < 6GB (为系统保留 2GB)
+#   - CPU 线程固定 4 核
+
+# ── Networks ──
+networks:
+  stockstream-net:
+    driver: bridge
+    name: stockstream-net
+
+# ── Volumes ──
+volumes:
+  stockstream-data:
+    driver: local
+  stockstream-logs:
+    driver: local
+  stockstream-cache:
+    driver: local
+  stockstream-backups:
+    driver: local
+  redis-data:
+    driver: local
+
+# ── Services ──
+services:
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # 核心应用 (Jetson GPU 模式)
+  # ═══════════════════════════════════════════════════════════════════════════
+  stockstream:
+    build:
+      context: .
+      dockerfile: Dockerfile.jetson
+      target: jetson
+    image: stockstream:${STOCKSTREAM_TAG:-jetson-latest}
+    container_name: stockstream-app
+    restart: unless-stopped
+
+    # ── GPU 运行时 ──
+    runtime: nvidia
+
+    # ── 环境变量 ──
+    environment:
+      # 核心
+      STOCKSTREAM_ENV: "production"
+      STOCKSTREAM_HOST: "0.0.0.0"
+      STOCKSTREAM_PORT: "8080"
+      STOCKSTREAM_LOG_LEVEL: "${LOG_LEVEL:-info}"
+      TZ: "Asia/Shanghai"
+
+      # Jetson 模式
+      STOCKSTREAM_JETSON_MODE: "1"
+
+      # GPU 配置
+      NVIDIA_VISIBLE_DEVICES: "all"
+      NVIDIA_DRIVER_CAPABILITIES: "compute,utility,video"
+
+      # CPU/内存优化
+      OMP_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      OPENBLAS_NUM_THREADS: "4"
+
+      # ONNX TensorRT 优化
+      ORT_TENSORRT_FP16_ENABLE: "1"
+      ORT_TENSORRT_ENGINE_CACHE_ENABLE: "1"
+      ORT_TENSORRT_ENGINE_CACHE_PATH: "/app/cache/trt_engines"
+
+      # 数据库
+      STOCKSTREAM_DATABASE__URL: "sqlite+aiosqlite:///data/stockstream.db"
+      STOCKSTREAM_DATABASE__WAL_MODE: "true"
+      STOCKSTREAM_DATABASE__POOL_SIZE: "3"
+
+      # Redis 缓存 (V3.0: Jetson 内网 Redis)
+      STOCKSTREAM_REDIS__URL: "${REDIS_URL:-redis://redis:6379/0}"
+
+      # V3.0 备份
+      STOCKSTREAM_BACKUP__DIR: "/app/backups"
+      STOCKSTREAM_BACKUP__RETENTION_DAYS: "30"
+      STOCKSTREAM_BACKUP__SCHEDULE_HOUR: "3"
+
+      # V3.0 资源管理 (Jetson 阈值)
+      STOCKSTREAM_RESOURCE__MEMORY_THRESHOLD: "0.75"
+      STOCKSTREAM_RESOURCE__GPU_THRESHOLD: "0.85"
+      STOCKSTREAM_RESOURCE__CPU_THRESHOLD: "0.80"
+      STOCKSTREAM_RESOURCE__CHECK_INTERVAL: "15"
+
+      # 数字人 — Jetson 默认关闭以节省 GPU 内存
+      STOCKSTREAM_AVATAR__ENABLED: "${AVATAR_ENABLED:-false}"
+
+      # TTS
+      STOCKSTREAM_TTS__VOICE: "${TTS_VOICE:-zh_CN-huayan-medium}"
+
+      # 推流
+      STOCKSTREAM_STREAM__RTMP_URL: "${RTMP_URL:-}"
+      STOCKSTREAM_STREAM__HARDWARE_ENCODER: "h264_nvenc"
+
+      # AI 分析
+      STOCKSTREAM_ANALYSIS__DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      STOCKSTREAM_ANALYSIS__DEEPSEEK_MODEL: "${DEEPSEEK_MODEL:-deepseek-chat}"
+
+      # 直播平台
+      STOCKSTREAM_LIVE__DOUYIN__COOKIE: "${DOUYIN_COOKIE:-}"
+      STOCKSTREAM_LIVE__DOUYIN__ROOM_ID: "${DOUYIN_ROOM_ID:-}"
+
+    # ── 端口 ──
+    ports:
+      - "8080:8080"    # API + 直播页 + 监控
+
+    # ── 挂载 ──
+    volumes:
+      - stockstream-data:/app/data
+      - stockstream-logs:/app/logs
+      - stockstream-cache:/app/cache
+      - stockstream-backups:/app/backups
+      - ./config:/app/config:ro
+      - ./models:/app/models:ro
+      # GPU 设备 / CUDA 库 (只读)
+      - /usr/local/cuda:/usr/local/cuda:ro
+      # Jetson 硬件信息 (只读)
+      - /proc/device-tree:/proc/device-tree:ro
+      - /sys/devices:/sys/devices:ro
+
+    # ── 网络 ──
+    networks:
+      - stockstream-net
+
+    # ── 资源限制 (Jetson Xavier NX: 8GB RAM → 限制 5800MB) ──
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 5800M
+        reservations:
+          cpus: '3'
+          memory: 3072M
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    # ── 健康检查 ──
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+    # ── 日志轮转 ──
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+    # ── 安全加固 ──
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    tmpfs:
+      - /tmp:exec
+
+    # ── 内核参数 (Jetson 优化) ──
+    sysctls:
+      net.core.somaxconn: 1024
+      net.ipv4.tcp_tw_reuse: 1
+
+    # ── 依赖 (V3.0: 添加 Redis) ──
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Redis 缓存 (V3.0: Jetson 轻量级缓存)
+  # ═══════════════════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: stockstream-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    networks:
+      - stockstream-net
+    volumes:
+      - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 192M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"

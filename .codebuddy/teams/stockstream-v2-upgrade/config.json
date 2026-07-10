@@ -1,0 +1,18 @@
+{
+  "name": "stockstream-v2-upgrade",
+  "leadAgentId": "2873c679af4d400399477a1b1ea4f692",
+  "workspacePath": "d:/ai/stock/stockStream",
+  "createdAt": "2026-06-24T02:05:38.292Z",
+  "options": {
+    "workspacePath": "d:/ai/stock/stockStream",
+    "isAutoTeam": false
+  },
+  "members": [
+    {
+      "memberId": "team-lead@stockstream-v2-upgrade",
+      "name": "team-lead",
+      "role": "Team Lead - coordinates the team and interacts with the user"
+    }
+  ],
+  "isAutoTeam": false
+}

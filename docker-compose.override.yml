@@ -1,0 +1,50 @@
+# StockStream V3.0 — docker-compose.override.yml
+# 本地开发覆盖配置 (docker compose up 自动合并)
+#
+# 用途:
+#   - 挂载本地源码实现热重载
+#   - 降低资源限制适应开发环境
+#   - 启用 debug 端口
+#   - 禁用 GPU (开发用 CPU 模式)
+
+services:
+  stockstream:
+    # ── 开发模式: 挂载本地源码 (热重载) ──
+    # 取消注释以下行实现代码热重载:
+    # volumes:
+    #   - ./src:/app/src
+    #   - ./stockstream:/app/stockstream
+    #   - stockstream-data:/app/data
+    #   - stockstream-logs:/app/logs
+    #   - stockstream-cache:/app/cache
+
+    # ── 开发环境变量 ──
+    environment:
+      STOCKSTREAM_ENV: "development"
+      STOCKSTREAM_LOG_LEVEL: "debug"
+      STOCKSTREAM_JETSON_MODE: "0"
+      PYTHONUNBUFFERED: "1"
+
+    # ── 降低资源限制 (开发) ──
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2048M
+        reservations:
+          cpus: '1'
+          memory: 1024M
+
+    # ── 开发端口 ──
+    ports:
+      - "8080:8080"
+      # debugpy 远程调试端口 (可选)
+      # - "5678:5678"
+
+    # ── healthcheck 放宽 (开发环境) ──
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s

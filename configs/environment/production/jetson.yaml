@@ -1,0 +1,123 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — 生产环境 / Jetson Xavier NX
+# ============================================================
+# 硬件:     NVIDIA Jetson Xavier NX 8GB
+# 用途:     7×24 无人值守直播推流
+# 继承链:   base → jetson → production → 本文件
+# 优先级:   最高 (仅次于环境变量)
+
+extends: [jetson, production]
+
+platform: jetson
+mode: production
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 1                  # ARM64 单 worker，内存受限于 8GB
+  reload: false
+  debug: false
+  cors_origins:
+    - "https://your-domain.com"
+
+gpu:
+  enabled: true
+  cuda_version: "11.4"
+  onnx_providers: ["TensorrtExecutionProvider", "CUDAExecutionProvider"]
+  fp16: true                  # TensorRT FP16 加速
+  benchmark: false
+  memory_limit_mb: 5800       # 为系统其他进程预留 ~2GB
+  tensorrt_fp16: true
+  tensorrt_cache_path: "/data/tensorrt_cache"
+
+market:
+  real_data: true
+  mock_fallback: true         # 网络抖动时降级为模拟数据
+  provider: "akshare"
+  cache_ttl_seconds: 600
+  update_interval: 10
+  retry_max: 5
+  retry_backoff: 3.0
+
+interaction:
+  real_danmu: true
+  mock_enabled: false
+  danmaku_enabled: true
+  max_danmaku_per_frame: 5
+  fake_viewers_enabled: false  # 生产环境禁用假观众
+
+avatar:
+  enabled: true
+  multi_avatar: false          # Xavier NX 单头像节省内存
+  large_model: false
+  fps: 15
+  resolution: [384, 384]
+  face_detector_interval: 3
+  onnx_optimization: "basic"
+
+tts:
+  enabled: true
+  engine: "piper"
+  fp16: true
+  sample_rate: 16000
+
+subtitle:
+  enabled: true
+  font_size: 20
+
+monitor:
+  enabled: true
+  dashboard: true
+  metrics_port: 9090
+  sample_interval: 15
+  alerts:
+    enabled: true
+    webhook_url: "${ALERT_WEBHOOK_URL}"
+    dingtalk_url: "${ALERT_DINGTALK_URL}"
+  watchdog:
+    enabled: true             # Jetson 启用硬件看门狗
+    auto_restart: true
+    max_restarts_per_day: 5
+
+security:
+  auth_required: true
+  api_token_enabled: true
+  encrypt_config: true
+  log_sanitize: true
+  rate_limit: true
+  rate_limit_per_minute: 30
+  token_expire_hours: 12
+
+storage:
+  database_url: "sqlite:///data/stockstream.db"
+  backup_interval_hours: 6   # Jetson 频繁备份防丢失
+  backup_retention_days: 14
+  cleanup_enabled: true       # 磁盘空间受限，自动清理旧数据
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Shanghai"
+  auto_start: true
+  auto_stop: true
+  market_open_time: "09:00"
+  market_close_time: "15:30"
+  pre_market_minutes: 30
+
+logging:
+  level: "WARNING"
+  console: false
+  file: true
+  json_format: true
+  rotation: "midnight"
+  max_bytes: 52428800         # 50MB (Jetson 磁盘限制)
+  backup_count: 3
+
+# ── Jetson 专属可靠性配置 ──
+reliability:
+  health_check_interval: 30
+  stream_reconnect_attempts: 10
+  circuit_breaker:
+    enabled: true
+    api_failure_threshold: 5
+    api_recovery_timeout: 60
+  graceful_shutdown_timeout: 30

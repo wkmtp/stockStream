@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CodeBuddy
+.codebuddy/
+
+# Git
+.git/
+.gitignore
+
+# Test / temp scripts (排除调试文件)
+_test_*.py
+_check_*.py
+_verify_*.py
+_stress_*.py
+_arch_test_output.txt
+_out.txt
+_stress_output.txt
+_out*.txt
+
+# Logs
+*.log
+logs/*.log
+logs/*.20*
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Data files (运行时创建)
+data/*.db
+data/*.json
+cache/*
+backups/*
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Docker 自身
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+docker/
+
+# Node (如果有)
+node_modules/
+npm-debug.log*
+
+# Misc
+*.md          # 文档免入镜像
+dict
+*.onnx        # 模型文件通过 volume 挂载, 不打入镜像
+40.8.0

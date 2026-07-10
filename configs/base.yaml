@@ -1,0 +1,149 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 Enterprise — 基础配置 (所有平台共享)
+# ============================================================
+# 本文件定义所有平台通用的默认配置
+# 平台特定配置会覆盖此文件的对应项
+# 优先级: 环境变量 > 平台配置 > 基础配置
+
+app:
+  name: "AI财经直播"
+  version: "4.0.0"
+  edition: "Enterprise"
+  base_dir: "/opt/stockstream"
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 1
+  cors_origins:
+    - "*"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)-20s | %(message)s"
+  datefmt: "%Y-%m-%dT%H:%M:%S%z"
+  file: "logs/stockstream.log"
+  max_bytes: 104857600      # 100MB
+  backup_count: 7
+  rotation: "midnight"
+  json_format: false        # 生产环境开启 JSON 输出
+
+market:
+  provider: "akshare"
+  cache_ttl_seconds: 300
+  symbols:
+    sh: ["000001", "000002", "600519", "600036", "601318"]
+    sz: ["399001", "399006"]
+    hk: ["00700", "09988"]
+    us: ["AAPL", "GOOGL", "MSFT"]
+  update_interval: 5        # 行情更新间隔(秒)
+  retry_max: 3
+  retry_backoff: 2.0
+
+analysis:
+  kline_periods: ["1d", "1w", "1m"]
+  indicators: ["ma", "macd", "rsi", "kdj", "boll"]
+  trend_window: 20
+  pattern_recognition: false  # Jetson 平台关闭
+
+dialogue:
+  max_context_turns: 10
+  temperature: 0.7
+  top_p: 0.9
+  max_tokens: 512
+  personality: "professional"  # professional | casual | aggressive
+  greet_enabled: true
+  news_inject_count: 3
+
+director:
+  scene_duration_seconds: 300
+  transition_frames: 30
+  auto_switch: true
+  scenes:
+    - "opening"
+    - "market_overview"
+    - "stock_analysis"
+    - "news_brief"
+    - "interaction"
+    - "closing"
+
+avatar:
+  enabled: true
+  model: "wav2lip"
+  face_model: "yolov8n-face"
+  fps: 25
+  resolution: [512, 512]
+  fp16: true                  # 优先 FP16
+  batch_size: 1
+
+tts:
+  engine: "piper"             # piper | edge | azure
+  voice: "zh-CN-shaanxi"
+  speed: 1.0
+  sample_rate: 22050
+  fp16: true
+
+subtitle:
+  enabled: true
+  font: "SimHei"
+  font_size: 24
+  color: "#FFFFFF"
+  stroke_color: "#000000"
+  stroke_width: 2
+  position: "bottom"          # top | bottom | center
+
+chart:
+  width: 1920
+  height: 1080
+  fps: 25
+  dpi: 100
+  theme: "dark"
+  show_volume: true
+  show_grid: true
+
+interaction:
+  danmaku_enabled: true
+  max_danmaku_per_frame: 10
+  vote_duration_seconds: 60
+  fake_viewers_base: 500
+  fake_viewers_jitter: 200
+
+storage:
+  database_url: "sqlite:///data/stockstream.db"
+  cache_dir: "cache"
+  models_dir: "models"
+  data_dir: "data"
+  backup_dir: "data/backups"
+  backup_interval_hours: 24
+  backup_retention_days: 30
+
+monitor:
+  enabled: true
+  metrics_port: 9090
+  sample_interval: 5          # 秒
+  alert_thresholds:
+    cpu_percent: 80
+    gpu_percent: 85
+    memory_percent: 90
+    disk_percent: 85
+    gpu_memory_percent: 80
+    tts_latency_ms: 1000
+    avatar_latency_ms: 2000
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Shanghai"
+  market_open_time: "09:00"
+  market_close_time: "15:30"
+  pre_market_minutes: 30
+  session_duration_hours: 8
+
+security:
+  api_token_enabled: false
+  token_expire_hours: 24
+  encrypt_config: false
+  log_sanitize: true
+  rate_limit_per_minute: 60
+  cookie_secure: true
+  cookie_httponly: true
+  cookie_samesite: "Lax"

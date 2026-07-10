@@ -1,0 +1,96 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — 生产环境 / Desktop
+# ============================================================
+# 用途:    生产部署 - RTX 桌面服务器
+# 继承链:  base → desktop → production → 本文件
+# 优先级:  最高 (仅次于环境变量)
+extends: [desktop, production]
+
+platform: desktop
+mode: production
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 4
+  reload: false
+  debug: false
+  cors_origins:
+    - "https://your-domain.com"
+
+gpu:
+  enabled: true
+  cuda_version: "12.x"
+  onnx_providers: ["CUDAExecutionProvider"]
+  fp16: false
+  benchmark: false
+
+market:
+  real_data: true
+  mock_fallback: false
+  provider: "akshare"
+  retry_max: 5
+  retry_backoff: 3.0
+
+interaction:
+  real_danmu: true
+  mock_enabled: false
+  danmaku_enabled: true
+  vote_duration_seconds: 60
+
+avatar:
+  enabled: true
+  multi_avatar: true
+  large_model: true
+  fps: 25
+
+tts:
+  enabled: true
+  engine: "azure"
+  fp16: false
+  sample_rate: 22050
+
+subtitle:
+  enabled: true
+
+monitor:
+  enabled: true
+  dashboard: true
+  metrics_port: 9090
+  alerts:
+    enabled: true
+    webhook_url: "${ALERT_WEBHOOK_URL}"
+    dingtalk_url: "${ALERT_DINGTALK_URL}"
+
+security:
+  auth_required: true
+  api_token_enabled: true
+  encrypt_config: true
+  log_sanitize: true
+  rate_limit: true
+  rate_limit_per_minute: 60
+  token_expire_hours: 24
+  ip_whitelist:
+    - "${ADMIN_IP_RANGE}"
+
+storage:
+  database_url: "sqlite:///data/stockstream.db"
+  backup_interval_hours: 12
+  backup_retention_days: 90
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Shanghai"
+  auto_start: true
+  auto_stop: true
+  market_open_time: "09:00"
+  market_close_time: "15:30"
+
+logging:
+  level: "WARNING"
+  console: false
+  file: true
+  json_format: true
+  rotation: "midnight"
+  max_bytes: 104857600
+  backup_count: 30

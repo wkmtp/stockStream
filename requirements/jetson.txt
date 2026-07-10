@@ -1,0 +1,42 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Jetson Xavier NX 依赖
+# ============================================================
+# 硬件:     NVIDIA Jetson Xavier NX 8GB
+# 系统:     Ubuntu 20.04 LTS
+# JetPack:  5.x (L4T R35.x)
+# CUDA:     11.4
+# TensorRT: 8.x
+# Python:   3.9 (deadsnakes PPA, akshare 不再支持 3.8)
+# CPU:      ARM64 (aarch64)
+
+# ── GPU & ONNX (Jetson) ──
+# onnxruntime CPU 版 (PyPI 提供 aarch64 wheel)
+# GPU 加速需自行编译 onnxruntime-gpu 或使用 NVIDIA 官方源
+onnx>=1.14.0,<2.0.0
+
+# ── 计算机视觉 (Jetson 优化版) ──
+# opencv 使用 JetPack 内置版本 (OpenCV 4.5.4 + CUDA)
+# sudo apt-get install -y libopencv-dev python3-opencv
+pillow>=9.0.0,<11.0.0
+
+# ── 音频处理 ──
+librosa==0.9.2
+soundfile>=0.10.0,<0.13.0
+
+# ── 数据源 (akshare 最低可用版本 1.16.72, 要求 Python >=3.9) ──
+akshare>=1.16.72,<2.0.0
+
+# ── 科学计算 (Python 3.9 版本上限放宽) ──
+scipy>=1.5.0,<1.14.0
+scikit-learn>=1.0.0,<1.6.0
+matplotlib>=3.5.0,<3.10.0
+
+# ── 视频输出 ──
+# av 在 ARM64 上需要从源码编译: pip install av --no-binary av
+
+# ── TTS 引擎 ──
+piper-tts>=1.2.0,<2.0.0    # 纯 Python + ONNX，ARM64 原生支持
+
+# ── Jetson 系统监控 ──
+# jetson-stats (tegrastats 替代，可选)
+# sudo pip install jetson-stats

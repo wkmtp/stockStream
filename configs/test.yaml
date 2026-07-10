@@ -1,0 +1,47 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — 测试环境配置
+# ============================================================
+# 用途:      CI/CD 自动化测试 / 压力测试
+# Python:    3.8+
+
+server:
+  host: "127.0.0.1"
+  port: 18080
+  workers: 1
+
+logging:
+  level: "WARNING"
+  json_format: false
+  file: "/dev/null"
+
+market:
+  provider: "mock"
+
+avatar:
+  enabled: false
+
+tts:
+  engine: "piper"
+  fp16: true
+  sample_rate: 8000          # 最低采样率加速测试
+
+chart:
+  width: 640
+  height: 360
+  fps: 5
+
+interaction:
+  danmaku_enabled: false
+
+monitor:
+  enabled: false
+
+storage:
+  database_url: "sqlite:///data/test.db"
+
+scheduler:
+  enabled: false
+
+security:
+  api_token_enabled: false
+  rate_limit_per_minute: 10000

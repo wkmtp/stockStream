@@ -1,0 +1,62 @@
+[Unit]
+Description=StockStream V3.0 AI 双数字人财经直播平台 (Jetson Xavier NX LTS)
+Documentation=https://github.com/stockstream/stockstream
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stockstream
+Group=stockstream
+WorkingDirectory=/opt/stockstream
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=STOCKSTREAM_JETSON_MODE=1
+Environment=STOCKSTREAM_ENV=production
+Environment=STOCKSTREAM_LOG_LEVEL=info
+Environment=OMP_NUM_THREADS=4
+Environment=MKL_NUM_THREADS=4
+Environment=ORT_TENSORRT_FP16_ENABLE=1
+Environment=ORT_TENSORRT_ENGINE_CACHE_ENABLE=1
+Environment=ORT_TENSORRT_ENGINE_CACHE_PATH=/opt/stockstream/cache/trt_engines
+Environment=NVIDIA_VISIBLE_DEVICES=all
+Environment=TZ=Asia/Shanghai
+
+ExecStart=/opt/stockstream/.venv/bin/python -m src.main --jetson --port 8080
+ExecStop=/bin/kill -TERM $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+
+# ── 自动恢复 ──
+Restart=always
+RestartSec=15
+StartLimitInterval=600
+StartLimitBurst=10
+
+# ── 资源限制 (Jetson Xavier NX 8GB) ──
+MemoryMax=6G
+MemoryHigh=5G
+CPUQuota=300%
+TasksMax=512
+LimitNOFILE=65536
+
+# ── 日志输出 ──
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stockstream
+
+# ── 安全增强 ──
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/stockstream/data /opt/stockstream/logs /opt/stockstream/cache /opt/stockstream/backups
+ReadOnlyPaths=/opt/stockstream/config
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,97 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Release: production-desktop
+# ============================================================
+# 用途:     正式商业直播部署 (Windows/Linux Desktop)
+# 平台:     x86_64 + RTX 显卡 (CUDA 12)
+# Python:   3.10+
+# 继承链:   base → desktop → production → environment/production/desktop → 本文件
+# ============================================================
+
+extends: [desktop, production, environment/production/desktop]
+
+release:
+  name: "production-desktop"
+  target: "production"
+  description: "桌面生产版本 - RTX GPU + 多数字人 + 大模型 + 7x24"
+
+platform: desktop
+mode: production
+
+server:
+  host: "0.0.0.0"
+  port: "${STREAM_PORT:-8080}"
+  workers: 4
+  reload: false
+  debug: false
+
+gpu:
+  enabled: true
+  onnx_providers: ["CUDAExecutionProvider"]
+  fp16: false
+  benchmark: false
+  cuda_visible_devices: "${CUDA_VISIBLE_DEVICES:-0}"
+
+market:
+  provider: "akshare"
+  real_data: true
+  mock_fallback: false
+  retry_max: 5
+  retry_backoff: 3.0
+
+interaction:
+  real_danmu: true
+  mock_enabled: false
+  danmaku_enabled: true
+  vote_duration_seconds: 60
+
+avatar:
+  enabled: true
+  multi_avatar: true
+  large_model: true
+  fps: 25
+  resolution: [512, 512]
+
+tts:
+  engine: "azure"
+  fp16: false
+  sample_rate: 22050
+
+monitor:
+  enabled: true
+  dashboard: true
+  metrics_port: 9090
+  alerts:
+    enabled: true
+    notify_on_critical: true
+    notify_on_warning: false
+
+security:
+  api_token_enabled: true
+  auth_required: true
+  encrypt_config: true
+  log_sanitize: true
+  rate_limit: true
+  rate_limit_per_minute: 60
+  token_expire_hours: 24
+  cookie_secure: true
+  cookie_httponly: true
+
+scheduler:
+  enabled: true
+  timezone: "Asia/Shanghai"
+  auto_start: true
+  auto_stop: true
+
+logging:
+  level: "WARNING"
+  console: false
+  file: true
+  json_format: true
+  rotation: "midnight"
+  backup_count: 30
+
+production:
+  auto_recovery: true
+  max_restart_attempts: 10
+  health_check_interval: 30
+  graceful_timeout: 30

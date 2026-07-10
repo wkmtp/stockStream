@@ -1,0 +1,34 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Demo Docker Compose
+# ============================================================
+# 用法: docker compose -f docker/demo/docker-compose.yml up -d
+
+version: "3.8"
+
+services:
+  ai-live-demo:
+    build:
+      context: ../..
+      dockerfile: docker/demo/Dockerfile
+    image: ai-live-demo:4.0.0
+    container_name: ai-live-demo
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - STOCKSTREAM_PLATFORM=demo
+    volumes:
+      - ../../data:/opt/stockstream/data
+      - ../../logs:/opt/stockstream/logs
+      - ../../configs:/opt/stockstream/configs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"

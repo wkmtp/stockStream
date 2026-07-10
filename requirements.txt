@@ -1,0 +1,45 @@
+# ⚠️ 已废弃 — 请使用 requirements-jetson.txt (Python 3.8 LTS)
+# 本文件仅保留作为 x86 开发环境参考
+# Jetson Xavier NX 部署: pip install -r requirements-jetson.txt
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+SQLAlchemy==2.0.36
+aiosqlite==0.20.0
+httpx==0.28.1
+websockets==14.1
+python-dotenv==1.0.1
+numpy==1.26.4
+pandas==2.2.3
+akshare>=1.18.60,<1.19.0
+tushare>=1.4.1
+zzshare>=0.4.0
+piper-tts>=1.2.0
+apscheduler==3.11.0
+
+# Chart rendering — matplotlib + plotly + Pillow for PNG caching
+matplotlib>=3.8.0
+plotly>=5.18.0
+Pillow>=10.0.0
+
+# Avatar — Wav2Lip ONNX talking-head generation
+onnxruntime>=1.17.0
+opencv-python-headless>=4.9.0,<5.0
+librosa>=0.10.2
+soundfile>=0.12.1
+
+# Stream — RTMP push streaming via FFmpeg
+# Requires FFmpeg installed on the system: sudo apt install ffmpeg
+# On Jetson with NVENC hardware encoder support:
+#   FFmpeg must be built with --enable-nvenc flag; use:
+#   video_codec: "h264_nvenc" in stream config for GPU-accelerated encoding.
+
+# Forced alignment (word-level audio-text synchronisation)
+# Requires espeak-ng system package: sudo apt install espeak-ng
+# Install separately if needed: pip install aeneas
+# aeneas>=1.7.3
+
+# Optional extension points (install only when needed on Jetson)
+# tensorrt: install from NVIDIA JetPack repositories when enabling TensorRT inference.
+# wav2lip: convert the PyTorch checkpoint to ONNX separately (see avatar/wav2lip_onnx.py docstring).

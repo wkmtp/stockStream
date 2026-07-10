@@ -1,0 +1,79 @@
+# StockStream V3.0 — Prometheus 监控配置
+# 指标端点: http://stockstream:8080/metrics (由 prometheus_client 库暴露)
+
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+  external_labels:
+    app: stockstream
+    env: production
+    version: "3.0.0"
+
+# ── Alertmanager 配置 (可选) ──
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# ── 告警规则 ──
+rule_files:
+  - "/etc/prometheus/alerts/*.yml"
+
+# ── 采集目标 ──
+scrape_configs:
+
+  # StockStream 核心应用 — Python prometheus_client 指标
+  - job_name: stockstream
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 'stockstream:8080'
+        labels:
+          service: stockstream-core
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '(.+):\d+'
+        replacement: '$1'
+
+  # Prometheus 自监控
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - 'localhost:9090'
+
+  # Redis (如果运行)
+  - job_name: redis
+    static_configs:
+      - targets:
+          - 'stockstream-redis:6379'
+    metrics_path: /metrics
+    # Redis 需要 redis_exporter sidecar, 使用应用内置的 /health/redis 代替
+    # 或者添加: docker compose 添加 redis-exporter 服务
+
+  # PostgreSQL (profile: full 时生效)
+  - job_name: postgres
+    static_configs:
+      - targets:
+          - 'stockstream-postgres:9187'
+    # 需要 postgres_exporter: docker compose 添加 postgres-exporter 服务
+
+# ── 采集规则说明 ──
+# 1. stockstream:8080/metrics — 由 prometheus_client Python 库自动暴露
+#    包含: http_requests_total, python_gc_*, process_*, 应用自定义指标
+#    在 src/monitoring/metrics.py 中注册自定义 Counter/Gauge/Histogram
+#
+# 2. Redis 指标: 需要 redis_exporter 作为 sidecar 运行
+#    docker compose --profile monitoring 添加:
+#      redis-exporter:
+#        image: oliver006/redis_exporter:v1.59.0
+#        command: ['-redis.addr', 'redis://redis:6379']
+#
+# 3. PostgreSQL 指标: 需要 postgres_exporter
+#    docker compose --profile monitoring 添加:
+#      postgres-exporter:
+#        image: prometheuscommunity/postgres-exporter:v0.15.0
+#        environment:
+#          DATA_SOURCE_NAME: postgresql://stockstream:password@postgres:5432/stockstream?sslmode=disable

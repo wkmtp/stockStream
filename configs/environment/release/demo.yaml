@@ -1,0 +1,73 @@
+# ============================================================
+# AI数字人财经直播平台 V4.0 — Release: demo
+# ============================================================
+# 用途:     客户演示 / 快速体验
+# 平台:     任意平台 (纯 CPU, 零外部依赖)
+# Python:   3.8+
+# 继承链:   base → demo → 本文件
+# ============================================================
+
+extends: [demo]
+
+release:
+  name: "demo"
+  target: "demonstration"
+  description: "演示版本 - 全模拟数据 + 浏览器即可观看"
+
+platform: demo
+mode: demo
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 1
+  reload: false
+  debug: false
+
+# ── 全模拟模式 ──
+market:
+  provider: "mock"
+  mock_fallback: true
+  real_data: false
+
+interaction:
+  real_danmu: false
+  mock_enabled: true
+  danmaku_enabled: true
+  fake_viewers_base: 1500
+
+avatar:
+  enabled: false
+
+tts:
+  engine: "piper"
+  fp16: true
+  sample_rate: 16000
+
+gpu:
+  enabled: false
+  onnx_providers: ["CPUExecutionProvider"]
+  fp16: false
+
+monitor:
+  enabled: false
+
+scheduler:
+  enabled: false
+
+security:
+  api_token_enabled: false
+  auth_required: false
+  rate_limit: false
+
+logging:
+  level: "INFO"
+  console: true
+  file: false
+  json_format: false
+
+demo:
+  speed_multiplier: 1.0
+  auto_cycle_scenes: true
+  show_debug_overlay: false
+  record_session: false
